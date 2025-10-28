@@ -1,0 +1,74 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{float}
+\geometry{a4paper, margin=1in}
+\usepackage{tocloft}
+\usepackage{titling}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xeCJK}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{subfiles}
+\usepackage{threeparttable}
+
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}
+\graphicspath{{./figs/}{./out/}}
+
+% 页眉页脚
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{机器人学II 复习提纲}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{15pt}
+
+% 标题
+\title{机器人学II 复习提纲 \\ \vspace{0.5cm} \large }
+\author{collamentos@collamentos-JiguangPro-Series-GM5AR0O}
+\date{2025年9月}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+    {\Huge \textbf{机器人学II 复习提纲} \par}
+    \vspace{0.5cm}
+    {\Large 授课教师：李硕、李亮\par}
+    \vspace{3cm}
+    {\Large Colamentos \par}
+    {\Large 2025-2026秋冬学期 \par}
+\end{titlepage}
+
+\section*{前言}
+
+本学期首次熊蓉老师退出该课程， 改为李硕老师和李亮老师讲解。李硕老师的授课风格和内容与前几届有所不同，且考试风格可能也会有所变动。因此在面向往年历年卷复习可能出现偏差，且该课程实际上主要仍以背诵、记忆内容为主的情况下，我主要根据ppt内容整理了本提纲，主要面向23级机器人工程专业同学应对课程《机器人学II》考试时参考使用，并希望为后几届同学也能提供参考。
+
+笔者上课基本也没有听，整理也十分仓促，疏漏或不足较多，恳请批评指正，也欢迎同学们以及学弟学妹们直接用本tex代码继续在未来根据实际情况做出补充和修正！
+
+祝大家学习顺利！
+
+\begin{flushright}
+Colamentos\\
+2025年10月28日于玉泉31舍
+\end{flushright}
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+%=============================
+%=============================
+\subfile{sections/path_planning.tex}
+
+
+\end{document}
