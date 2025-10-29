@@ -21,6 +21,8 @@
 \usepackage{subcaption}
 \usepackage{subfiles}
 \usepackage{threeparttable}
+\usepackage{makecell} 
+\usepackage{array} 
 
 \DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}
 \graphicspath{{./figs/}{./out/}}
@@ -69,6 +71,7 @@ Colamentos\\
 %=============================
 %=============================
 \subfile{sections/path_planning.tex}
-
-
+\subfile{sections/obstacle_avoidance_planning.tex}
+\subfile{sections/trajectory_planning}
+\subfile{sections/navigation_planning_fusion_optimization.tex}
 \end{document}
