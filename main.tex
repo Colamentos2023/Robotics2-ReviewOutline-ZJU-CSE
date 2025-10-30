@@ -9,6 +9,14 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,        % 将链接文字而非边框着色
+    linkcolor=blue,         % 目录、公式、图表等内部链接颜色
+    citecolor=teal,         % 参考文献引用颜色
+    urlcolor=magenta,       % URL 链接颜色
+    filecolor=gray,         % 本地文件链接颜色
+    linktoc=all             % 目录中链接章节和页码都可点击
+}
 \usepackage{xeCJK}
 \usepackage{xcolor}
 \usepackage{enumitem}
@@ -53,7 +61,9 @@
 
 \section*{前言}
 
-本学期首次熊蓉老师退出该课程， 改为李硕老师和李亮老师讲解。李硕老师的授课风格和内容与前几届有所不同，且考试风格可能也会有所变动。因此在面向往年历年卷复习可能出现偏差，且该课程实际上主要仍以背诵、记忆内容为主的情况下，我主要根据ppt内容整理了本提纲，主要面向23级机器人工程专业同学应对课程《机器人学II》考试时参考使用，并希望为后几届同学也能提供参考。
+本学期首次熊蓉老师退出该课程， 改为李硕老师和李亮老师讲解。李硕老师的授课风格和内容与前几届有所不同，且考试风格可能也会有所变动。因此在面向往年历年卷复习可能出现偏差，且该课程实际上主要仍以背诵、记忆内容为主的情况下，我主要根据ppt内容整理了本提纲，主要面向23级机器人工程专业同学应对课程《机器人学II》考试时参考使用，并希望为后几届甚至更多同学也能提供参考。
+
+为了尽可能解决ppt结构相对不够清晰，且部分讲解有所省略的问题，我在整理中添加了一些个人的注解或有关链接，力争做到只需看本提纲便可以基本掌握课程全部内容，无需再阅读ppt。同时，对于具体的推导计算（很有可能不做考察，请以往年历年卷或根据老师说明为准），为了便于理解和查阅我也有所保留。为了加以区分，我将相对更属于“注释性说明”或“具体推导”的文字使用小写楷体来表示，同学们可以结合个人和考试实际需求选择性阅读。
 
 笔者上课基本也没有听，整理也十分仓促，疏漏或不足较多，恳请批评指正，也欢迎同学们以及学弟学妹们直接用本tex代码继续在未来根据实际情况做出补充和修正！
 
@@ -74,4 +84,7 @@ Colamentos\\
 \subfile{sections/obstacle_avoidance_planning.tex}
 \subfile{sections/trajectory_planning}
 \subfile{sections/navigation_planning_fusion_optimization.tex}
+\subfile{sections/Dynamics_Model_of_Quadrotor_UAV.tex}
+\subfile{sections/Odometry_Estimation.tex}
+\subfile{sections/Localization_Problem.tex}
 \end{document}
