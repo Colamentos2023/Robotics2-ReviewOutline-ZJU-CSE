@@ -103,8 +103,47 @@
         \item 存储大规模环境的图片需要较大的\textbf{存储空间}
         \item 对于实际环境中存在路标被破坏/污染、更换、稀疏等风险
     \end{itemize}
+\newpage
+\subsection*{概统知识回顾}
+\hspace{2em}在正式开始对马尔可夫自定位的介绍之前，我们最好回顾一下相关概率论与数理统计的知识基础；本部分是我自己加的\footnote{本节参考自ZJUDancer视觉组内训，https://www.bilibili.com/video/BV1wUmPYCERx/?spm_id_from=333.337.search-card.all.click&vd_source=5deca47094767260f853b759a625a68f}，对此感到熟悉的同学可以直接跳过到\hyperref[sec:markov]{控制感知信息融合的的自定位}继续阅读。
+    \begin{enumerate}
+        \item \textbf{全概率公式}：设事件组 \( {B}_{1},{B}_{2},\ldots ,{B}_{n} \) 满足下列条件
+        \begin{enumerate}
+            \item \( \mathop{\sum }\limits_{{i = 1}}^{n}{B}_{i} = S \) ;
+            \item \( {B}_{1},{B}_{2},\ldots ,{B}_{n} \) 互不相容;
+            \item \( P\left( {B}_{i}\right)  > 0,i = 1,2,\ldots n \)
+        \end{enumerate}
+        则对任意事件 \( A \) ,有 
+        $$ P\left( A\right)  = \mathop{\sum }\limits_{{i = 1}}^{n}P\left( {B}_{i}\right) P\left( {A \mid  {B}_{i}}\right) $$
+
+        \item \textbf{贝叶斯公式}：
+        \begin{itemize}
+            \item 对随机事件 \( \mathrm{A} \) , \( \mathrm{B} \) ,有
+            $$ P\left( {B \mid  A}\right)  = \frac{P\left( {AB}\right) }{P\left( A\right) } = \frac{P\left( B\right) P\left( {A \mid  B}\right) }{P\left( A\right) } $$
+            \item 对随机事件 \( \mathrm{A},\mathrm{B},\mathrm{C} \) ,若 \( P\left( {A \mid  C}\right)  > 0 \) ,有
+            $$ P\left( {B \mid  A,C}\right)  = \frac{P\left( {B \mid  C}\right) P\left( {A \mid  B,C}\right) }{P\left( {A \mid  C}\right) } $$
+        \end{itemize}
+
+        \item \textbf{马尔可夫性}：下一时刻的状态只与当前状态有关，与上一时刻状态无关。
+        \item \textbf{马尔可夫过程}：具有马尔可夫定性的过程，即：
+        $$ P\left( {{S}_{n} = {i}_{n} \mid  {S}_{n - 1} = {i}_{n - 1},\ldots ,{S}_{0} = {i}_{0}}\right)  = P\left( {{S}_{n} = {i}_{n} \mid  {S}_{n - 1} = {i}_{n - 1}}\right) $$
+        \item 在机器人定位问题中，还具有如下假设：
+            \begin{itemize}
+                \item 当前观测可由当前状态完全确定，即状态确定时，观测量与其他变量独立
+                \item 当前状态可由上一时刻状态和控制量完全确定，即上一时刻状态和控制量确定时，当前状态与其他变量独立
+            \end{itemize}
+        \end{enumerate}
+        设$t$时刻机器人状态(位置)为$x_t$,观测为$z_t$,控制信息为$u_t$,地图为$m$，则需求出
+        $$p(x_t\mid z_{1:t},u_{1:t-1},m)$$
+        ，即已知从最初到现在所有的观测信息，最初到上一时刻所有的控制信息以及地图，求机器人位于位姿$x_t$的概率。
         
-\subsection{控制感知信息融合的的自定位}
+
+
+
+    \end{enumerate}
+
+\newpage
+\subsection{控制感知信息融合的的自定位}\label{sec:markov}
 \begin{enumerate}
     \item \textbf{基本概念}：给定环境地图(对环境的已有知识)的条件下，根据机器人的运动控制/里程估计信息和传感器感知数据(当前认知)估计机器人相对于环境地图的坐标。
     \item \textbf{问题分类}：
@@ -152,7 +191,7 @@
         = p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
         \, p(\mathbf{X}^{t-1} \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
         \]
-        
+
         因为 \( \mathbf{X}^{t-1} \) 与之后的观测、控制无关：
         \[
         p(\mathbf{X}^{t-1} \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
@@ -166,12 +205,40 @@
         \]
         
         \item \textbf{引入贝叶斯公式：}
-        \[
-        p(Y \mid X) = \eta \, p(X \mid Y)p(Y)
-        \]
-        （其中 \(\eta\) 为归一化常数。）
-        
-        得：
+        对等号右端第一项应用贝叶斯公式，得
+$$
+p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
+= \frac{
+  p(\mathbf{z}_t \mid  \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  \;
+  p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+}{
+  p(\mathbf{z}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+}
+$$
+其中分母
+$$
+p(\mathbf{z}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+= \int 
+  p(\mathbf{z}_t \mid \mathbf{x}_t, \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  \;
+  p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  \, d\mathbf{x}_t
+$$
+仅依赖于历史量 $\mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m}$，与当前状态 $\mathbf{x}_t$ 无关；若被积函数 $f(x \mid c)$ 的条件 $c$ 中不包含积分变量 $x$，则积分 $\int f(x \mid c) \, dx$ 只依赖于 $c$，对 $x$ 而言是常数。故分母可作为常数，记为归一化因子 $\eta$，即
+$$
+\eta = \frac{1}{
+  p(\mathbf{z}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+}
+= \left[
+  \int 
+  p(\mathbf{z}_t \mid \mathbf{x}_t, \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  \;
+  p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  \, d\mathbf{x}_t
+\right]^{-1}
+$$
+从而
         \[
         p(\mathbf{X}^{t} \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
         = \eta \, p(\mathbf{z}_t \mid \mathbf{X}^{t}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
@@ -215,19 +282,35 @@
         \mathbf{x}_t = \mathbb{E}\left[\mathbf{x}_t \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m}\right]
         \]
         对应概率递推形式为：
-        \[
-        p(\mathbf{x}_t \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
-        = \eta \, p(\mathbf{z}_t \mid \mathbf{x}_t, \mathbf{m})
-        \int p(\mathbf{x}_t \mid \mathbf{x}_{t-1}, \mathbf{u}_{t-1}, \mathbf{m})
-        \, p(\mathbf{x}_{t-1} \mid \mathbf{Z}^{t-1}, \mathbf{U}^{t-2}, \mathbf{m})
-        \, d\mathbf{x}_{t-1}
-        \]
-        该公式被称为\textbf{实时自定位贝叶斯递推公式}。
-        
         \end{enumerate}
+        \[
+        \underbrace{p(\mathbf{x}_t \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})}_{\text{t时刻位姿}}
+        = \eta \;
+        \underbrace{p(\mathbf{z}_t \mid \mathbf{x}_t, \mathbf{m})}_{\text{观测模型}} \;
+        \int 
+        \underbrace {p(\mathbf{x}_t \mid \mathbf{x}_{t-1}, \mathbf{u}_{t-1}, \mathbf{m})
+        }_{\text{运动模型}}
+        \underbrace{
+          \, p(\mathbf{x}_{t-1} \mid \mathbf{Z}^{t-1}, \mathbf{U}^{t-2}, \mathbf{m})
+        }_{\text{t-1时刻位姿}}
+        \, d\mathbf{x}_{t-1} \]
         }
     \end{enumerate}
-\end{enumerate}
+
+该公式被称为\textbf{实时自定位贝叶斯递推公式}。
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\textwidth]{images/markov_example.png}
+                \caption{马尔可夫自定位流程}
+            \end{figure}
+            {\small\kaishu 如上图所示，我们抽象出一个一维运动的例子，用黑色函数代表运动模型得到的概率分布，红色函数代表观测模型得到的概率分布，我们机器人的自定位实际上是如下的过程：
+            \begin{itemize}
+                \item 先用运动模型：机器人初始化，可能在地图上任何一个位置出现，此时其运动模型是均匀分布的；
+                \item 再用观测模型：随后在图(b)机器人开始观测，发现有一个门，那机器人判断自己在三扇门出现的概率会更高，其他地方概率会更低，修正了运动模型
+                \item 机器人向前运动，如图(c)，继续用运动模型，对位姿进行预测，机器人预测自身的位置肯定整体向右移动了
+                \item 再用观测模型：随后在图(d)机器人开始观测，发现还有一个门，那机器人判断自己出现在第二扇门出现的概率会更高，据此再次修正了运动模型
+            \end{itemize}}
+            
 \subsection{马尔可夫定位中的运动模型}
         在上一节，我们得到了实时自定位贝叶斯递推公式
         \[
@@ -237,10 +320,10 @@
         \, p(\mathbf{x}_{t-1} \mid \mathbf{Z}^{t-1}, \mathbf{U}^{t-2}, \mathbf{m})
         \, d\mathbf{x}_{t-1}
         \]
-        对红色项，利用贝叶斯规则
+        对红色项(运动模型)，利用贝叶斯规则
         $$\textcolor{red}{p(\mathbf{x}_t \mid \mathbf{x}_{t-1}, \mathbf{u}_{t-1}, \mathbf{m})}=\eta     \textcolor{blue}{p(\mathrm{m}|\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})}\textcolor{orange}{p(\mathrm{x}_t|\mathrm{x}_{t-1},\mathrm{u}_{t-1})}$$
         \begin{itemize}
-            \item 橙色项：给定上一时刻位姿$x_{t-1}$和控制指令$u_{t-1}$，计算当前位姿$x_{t}$的概率分布，称之为\textbf{概率运动模型}
+            \item 橙色项：给定上一时刻位姿$x_{t-1}$和控制指令$u_{t-1}$，计算当前位姿$x_{t}$的概率分布
             \item 蓝色项：在控制指令$u_{t-1}$下机器人从$x_{t-1}$移动到$x_{t}$，在这样条件下地图$m$的可能性\footnote{如果路径或者$x_t$与环境障碍物碰撞，则获得地图$m$的可能性低。通过路径验证地图存在的可能性，实现地图条件下当前位姿估计的验证}
             \begin{figure}[H]
                 \centering
@@ -264,6 +347,7 @@
             \item \textbf{速度运动模型}：$u_{t-1}$是\textbf{控制机器人运动的指令}，回顾其航位推算计算公式：
             $$\left.\left(\begin{array}{c}x'\\y'\\\theta'\end{array}\right.\right)=\left(\begin{array}{c}x-\frac{\nu}{\omega}\sin(\theta)+\frac{\nu}{\omega}\sin(\theta+\omega\Delta t)\\y+\frac{\nu}{\omega}\cos(\theta)-\frac{\nu}{\omega}\cos(\theta+\omega\Delta t)\\\theta+\omega\Delta t\end{array}\right)$$
         \end{itemize}
+
 \begin{enumerate}
     \item \textbf{里程计运动模型}\\
     我们的最终目的是计算出$$p(\mathrm{x}_t|\mathrm{x}_{t-1},\mathrm{u}_{t-1})$$
@@ -286,12 +370,28 @@
         显然，实际测量中是带有各种原因导致的误差的，这里的$$\boldsymbol{\delta} = (\delta_{rot1}, \delta_{trans}, \delta_{rot2})^T$$
         考虑误差后，用头尖尖表示真实值，用波浪线代表误差，不戴帽子是测量值，实际上可以写作
         $$\boldsymbol{\delta} = ({\widehat{\delta }}_{rot1},{\widehat{\delta }}_{trans}, {\widehat{\delta }}_{rot2})^T$$
-        根据“真实值=测量值 - 误差”，其中
+        根据\textbf{“真实值 = 测量值 - 误差”}，其中
         $${\widehat{\delta }}_{rot1} = {\delta }_{rot1} - {\widetilde{\delta }}_{rot1}$$
         $${\widehat{\delta }}_{trans} = {\delta }_{trans} - {\widetilde{\delta }}_{trans}$$
         $${\widehat{\delta }}_{rot2} = {\delta }_{rot2} - {\widetilde{\delta }}_{rot2} $$
         那么实际的航位变化是
         \( \left( \begin{array}{l} {x}^{\prime } \\  {y}^{\prime } \\  {\theta }^{\prime } \end{array}\right)  = \left( \begin{matrix} x + {\widehat{\delta }}_{\text{trans }}\cos \left( {\theta  + {\widehat{\delta }}_{rot1}}\right) \\  y + {\widehat{\delta }}_{\text{trans }}\sin \left( {\theta  + {\widehat{\delta }}_{rot1}}\right) \\  \theta  + {\widehat{\delta }}_{rot1} + {\widehat{\delta }}_{rot2} \end{matrix}\right) \)
+                \item \textbf{闭式求解运动模型}\\
+            {\small\kaishu \textcolor{red}{闭式求解是看想要控制量的误差$\widetilde{\mathbf{u}}_{t-1}$：
+            \begin{enumerate}
+                \item 已知上一时刻的位姿$\mathbf{x}_{t-1}$、控制量$\mathbf{u}_{t-1}$
+                \item 假设一个接下来可能到达的候选位姿$\mathbf{x}_t$
+                \item 然后用逆模型（位姿→控制）计算，从$\mathbf{x}_{t-1}$到$\mathbf{x}_{t}$，需要执行什么控制$\widehat{\mathbf{u}}_{t-1}$？
+                \item 比较$\widehat{\mathbf{u}}_{t-1}$与$\mathbf{u}_{t-1}$，误差越大，越不可能
+            \end{enumerate}
+            }}
+            \begin{enumerate}
+                \item \textbf{测量控制值}：将里程计数据 \( {\mathbf\mathbf{u}}_{t - 1} \) 表示为 \( \mathbf{\delta } = {\left( {\delta }_{rot1},{\delta }_{trans},{\delta }_{rot2}\right) }^{T} \) ,作为测量控制值
+                \item \textbf{真实控制值}：根据 \( {\mathbf{x}}_{t - 1},{\mathbf{x}}_{t} \) 计算机器人的实际运动变化量 \( \widehat{\mathbf{\delta }} = {\left( {\widehat{\delta }}_{rot1},{\widehat{\delta }}_{trans},{\widehat{\delta }}_{rot2}\right) }^{T} \) ,作为真实控制值           
+                \item \textbf{估计分布}：根据真实值与测量值之间误差 \( \widetilde{\delta } = \delta  - \widehat{\delta } \) 的分布估计 \( {\mathbf{x}}_{t} \) 的分布
+                
+                $$ \boxed{p\left( {{\mathbf{x}}_{t} \mid  {\mathbf{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right)  = p\left( {\widetilde{\delta }}_{rot1}\right)  \cdot  p\left( {\widetilde{\delta }}_{trans}\right)  \cdot  p\left( {\widetilde{\delta }}_{rot2}\right)} $$
+            \end{enumerate}
 
          \item \textbf{误差的概率分布}\\
          真实值与测量值之间的误差应服从该分布“误差越小，概率越高；误差越大，概率越低”，我们可以设定误差为均值为0的高斯分布
@@ -306,33 +406,93 @@
                         {\small\kaishu 
             显然，平移造成的误差和旋转造成的误差不可能对所有机器人都是一比一的，因此我们设定一些参数$\alpha_i$来作为权重；对于旋转误差例如${\widetilde{\delta }}_{{rot}1}$，其误差组成包括旋转造成的旋转误差和平移造成的旋转误差两部分；平移误差同理。
             }
-        \item \textbf{求解运动模型}
-        
+
+        \item \textbf{随机采样求解运动模型}\\
+            {\small\kaishu \textcolor{red}{随机采样求解是看加上随机误差的控制量$\widetilde{\mathbf{u}}_{t-1}$下$ \mathbf{x}_t $更有可能落到哪里：
             \begin{enumerate}
-                \item \textbf{测量控制值}：将里程计数据 \( {\mathbf{u}}_{t - 1} \) 表示为 \( \mathbf{\delta } = {\left( {\delta }_{rot1},{\delta }_{trans},{\delta }_{rot2}\right) }^{T} \) ,作为测量控制值
-                \item \textbf{真实控制值}：根据 \( {\mathbf{x}}_{t - 1},{\mathbf{x}}_{t} \) 计算机器人的实际运动变化量 \( \widehat{\mathbf{\delta }} = {\left( {\widehat{\delta }}_{rot1},{\widehat{\delta }}_{trans},{\widehat{\delta }}_{rot2}\right) }^{T} \) ,作为真实控制值
+                \item 已知上一时刻的测量控制值$\mathbf{u}_{t-1}$ ，
+                \item 假设一个噪声$\widetilde{\mathbf{u}}_{t-1}$，得到真实控制值$\widehat{\mathbf{u}}_{t-1}$
+                \item 然后用正模型（控制→位姿）计算，从$\mathbf{x}_{t-1}$执行控制$\widehat{\mathbf{u}}_{t-1}$，会到达什么$\mathbf{x}_{t}$？
+                \item 重复若干次 → 得到若干个 $ \mathbf{x}_t $ 样本，落的点多的地方就是高概率区
+            \end{enumerate}
+            }}
+            \begin{enumerate}
                 \item \textbf{计算误差}：在噪声的高斯分布中随机采样\footnote{sample是一个计算机函数，调用时需传参均值和方差。均值对于误差而言就是0，我们先根据里程计的读数$\delta$和$\alpha$参数，计算出误差分布的方差$\sigma^2$；用采样函数，从一个均值为0、方差为我们刚刚计算出的$\sigma^2$的正态分布中，随机抽取一个具体的误差值$\widetilde{\delta }$。}
                 $${\widetilde{\delta }}_{rot1} = {sample}\left( {{\alpha }_{1}\left| {\delta }_{rot1}\right|  + {\alpha }_{2}\left| {\delta }_{trans}\right| }\right) ,{\widetilde{\delta }}_{trans} = \cdots ,{\widetilde{\delta }}_{rot2} = ... $$
                 基于采样得到的噪声和测量得到的里程计值,构建机器人实际执行
                 的控制指令\footnote{其实是基于采样得到的噪声和测量得到的里程计值，构建对机器人实际发生的物理运动$\widehat{\delta }$的一次随机估计}
-                $$ {\widehat{\delta }}_{rot1} = {\delta }_{rot1} - {\widetilde{\delta }}_{rot1},{\widehat{\delta }}_{trans} = {\delta }_{trans} - {\widetilde{\delta }}_{trans},{\widehat{\delta }}_{rot2} = {\delta }_{rot2} - {\widetilde{\delta }}_{rot2} $$               
-                \item \textbf{估计分布}：根据真实值与测量值之间误差 \( \widetilde{\delta } = \delta  - \widehat{\delta } \) 的分布估计 \( {\mathbf{x}}_{t} \) 的分布
-                
-                $$ \boxed{p\left( {{\mathbf{x}}_{t} \mid  {\mathbf{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right)  = p\left( {\widetilde{\delta }}_{rot1}\right)  \cdot  p\left( {\widetilde{\delta }}_{trans}\right)  \cdot  p\left( {\widetilde{\delta }}_{rot2}\right)} $$
+                $$ {\widehat{\delta }}_{rot1} = {\delta }_{rot1} - {\widetilde{\delta }}_{rot1},{\widehat{\delta }}_{trans} = {\delta }_{trans} - {\widetilde{\delta }}_{trans},{\widehat{\delta }}_{rot2} = {\delta }_{rot2} - {\widetilde{\delta }}_{rot2} $$    
+                \item \textbf{计算$\mathrm{x}_t$}：利用前述里程运动叠加模型计算$\mathrm{x}_t$
                 \item \textbf{重复计算}：重复上述过程,所得 \( {\mathbf{x}}_{t} \) 点集合构成对 \( p\left( {{\mathbf{x}}_{t} \mid  {\mathbf{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right) \) 的描述
-
             \end{enumerate}
-                {\small\kaishu 
-                为了求解运动模型，如果正向直接求解条件概率无疑是困难的。逆向思考，如果给定$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$，能导致这种变化的随机误差也应该是唯一的。即对于一组给定的 \( \left( {{\mathbf{x}}_{t - 1},{\mathbf{u}}_{t - 1},{\mathbf{x}}_{t}}\right) \) ,存在一个唯一确定的误差值 \( \widetilde{\delta } \) 与之对应。因此,观察到特定位姿 \( {\mathbf{x}}_{t} \) 的概率,等价于发生了那个能够导致 \( {\mathbf{x}}_{t} \) 出现的唯一误差 \( \widetilde{\delta } \) 的概率。\\
-                }
+                \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.6\textwidth]{images/alpha0.png}
+                \caption{不同$\alpha_i$参数下通过\textbf{闭式求解}得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
+                \end{figure}
                 \begin{figure}[H]
                 \centering
                 \includegraphics[width=0.6\textwidth]{images/alpha.png}
-                \caption{不同$\alpha_i$参数下得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$，每个子图含500个样本}
+                \caption{不同$\alpha_i$参数下通过\textbf{随机采样求解}得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$，每个子图含500个样本；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
                 \end{figure}
     \end{enumerate}
-    \item \textbf{速度运动模型}
+    \item \textbf{速度运动模型}\\
+    我们的最终目的是计算出$$p(\mathrm{x}_t|\mathrm{x}_{t-1},\mathrm{u}_{t-1})$$
+    在速度运动模型中，我们认为$\mathrm{u}_{t-1}$是$(v,\omega)$
+    \begin{enumerate}
+        \item \textbf{理想（无噪声）状态下的航位变化}\\
+        $$\begin{pmatrix} x' \\ y' \\ \theta' \end{pmatrix} = \begin{pmatrix} x - \frac{v}{\omega} \sin(\theta) + \frac{v}{\omega} \sin(\theta + \omega \Delta t) \\ y - \frac{v}{\omega} \cos(\theta) + \frac{v}{\omega} \cos(\theta + \omega \Delta t) \\ \theta + \omega \Delta t \end{pmatrix}$$
+
+        \item \textbf{不理想（有噪声）状态下的航位变化}\\
+        根据\textbf{“真实控制值 = 指令测量值 + 误差”}，其中
+        $$\widehat{v}=v+\widetilde{v}$$
+        $$\widehat{\omega}=\omega+\widetilde{\omega}$$
+        此外，我们考虑圆弧运动假设引起了退化问题（状态量三维，控制量二维）\footnote{实际噪声下，位姿变化可能不完美符合圆弧（比如小方向偏差）}，会导致应用贝叶斯估计状态中逆向求解时发生分歧，为此假设机器人到达末位姿后执行转动$\widehat{\gamma}$
+        \vspace{1em}
+        那么实际的航位变化是
+        $$\begin{pmatrix}x'\\y'\\\theta'\end{pmatrix}=\begin{pmatrix}x-\frac{\widehat{v}}{\widehat{\omega}}sin(\theta)+\frac{\widehat{v}}{\widehat{\omega}}sin(\theta+\widehat{\omega}\Delta t)\\y-\frac{\widehat{v}}{\widehat{\omega}}cos(\theta)+\frac{\widehat{v}}{\widehat{\omega}}cos(\theta+\widehat{\omega}\Delta t)\\\theta+\widehat{\omega}\Delta t+\widehat{\gamma}\Delta t\end{pmatrix}$$
+        
+        \item \textbf{闭式求解运动模型}
+        \begin{enumerate}
+            \item 根据所评估状态 $\mathbf{x}_t$ 和当前前状态 $\mathbf{x}_{t-1}$ 计算无噪声模型下的实际控制指令$\widehat{\mathbf{u}}_{t-1} = (\widehat{v}, \widehat{\omega}, \widehat{\gamma})$ 
+            \item 根据实际控制指令 $\widehat{\mathbf{u}}_{t-1}$ 和发送控制指令 $\mathbf{u}_{t-1}$ 之间误差分布估计 $\mathbf{x}_t$ 的分布
+            $$p(\mathbf{x}_t | \mathbf{x}_{t-1}, \mathbf{u}_{t-1}) = \varepsilon_{b_{\widetilde{v}}}(\widetilde{v}) \cdot \varepsilon_{b_{\widetilde{\omega}}}(\widetilde{\omega}) \cdot \varepsilon_{b_{\widetilde{\gamma}}}(\widetilde{\gamma})$$
+            $$\widetilde{v} = \widehat{v} - v$$
+            $$ \widetilde{\omega} = \widehat{\omega} - \omega$$
+            $$ \widetilde{\gamma} = \widehat{\gamma}$$
+        \end{enumerate}
+
+        \item \textbf{误差的概率分布}\\
+         误差/噪声一般可以建模为均值为0，标准偏差为b的高斯分布或者三角分布
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.3\textwidth]{images/error2.png}
+                \caption{设定为高斯分布/三角分布的误差}
+            \end{figure}
+            可以设：
+            $$b_{\widetilde{v}} = \alpha_{1}|v| + \alpha_{2}|\omega|$$
+            $$ b_{\widetilde{\omega}} = \alpha_{3}|v| + \alpha_{4}|\omega|$$
+            $$b_{\widetilde{\gamma}} = \alpha_{5}|v| + \alpha_{6}|\omega|$$
+            
+        \item \textbf{随机求解运动模型}
+        \begin{enumerate}
+            \item 将噪声建模为高斯分布，根据噪声的高斯分布随机采样噪声
+            $$\widetilde{v} = \mathrm{sample}(\alpha_1 |v| + \alpha_2 |\omega|)$$
+            $$\widetilde{\omega} = \mathrm{sample}(\alpha_3 |v| + \alpha_4 |\omega|)$$
+            $$\widetilde{\gamma} = \mathrm{sample}(\alpha_5 |v| + \alpha_6 |\omega|)$$
+            \item 基于采样得到的噪声和发送的控制指令，构建机器人实际执行控制指令
+            $$\widehat{v} = v + \widetilde{v}$$
+            $$\widehat{\omega} = \omega + \widetilde{\omega}$$
+            $$\widehat{\gamma} = \widetilde{\gamma}$$
+            \item 利用前述正向运动模型计算 $\mathbf{x}_t$
+            \item 重复上述过程，所得 $\mathbf{x}_t$ 点集合构成为对 $\mathbf{x}_t$ 的概率分布描述
+        \end{enumerate}
 \end{enumerate}
+
+
+        
+\vspace{2em}
+\textbf{仅用运动模型存在问题}：\\
 \textcolor{red}{如果只考虑运动模型进行位姿估计，其不确定性（方差）会不断地无上限增大}
                     \begin{figure}[H]
                     \centering
@@ -351,7 +511,7 @@
 \begin{enumerate}
     \item \textbf{特征传感器模型和观测模型}
     \item \textbf{基于物理建模的激光传感器模型}
-    \item \textbf{基于Likelihood Field的激光束模}
+    \item \textbf{基于Likelihood Field的激光束模型}
 \end{enumerate}
-
+\end{enumerate}
 \end{document}
