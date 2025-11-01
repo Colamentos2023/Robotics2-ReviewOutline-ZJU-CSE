@@ -31,10 +31,13 @@
 \usepackage{threeparttable}
 \usepackage{makecell} 
 \usepackage{array} 
-
+\usepackage{enumitem}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}
 \graphicspath{{./figs/}{./out/}}
-
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[mathscr]{euscript} 
+\usepackage{bm}
 % 页眉页脚
 \pagestyle{fancy}
 \fancyhf{}
@@ -88,4 +91,5 @@ Colamentos\\
 \subfile{sections/Odometry_Estimation.tex}
 \subfile{sections/Localization_Problem.tex}
 \subfile{sections/Real-time_Markov_Localization_Computation.tex}
+\subfile{sections/SLAM.tex}
 \end{document}

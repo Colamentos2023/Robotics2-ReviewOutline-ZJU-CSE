@@ -342,9 +342,11 @@
 
             \item \textbf{求解旋转矩阵 \( R \)：}
             \begin{align*}
-                \min_R \frac{1}{2}\sum_{i=1}^{n}\|\mathbf{q}_i - R\mathbf{q}'_i\|^2 
-                &= \frac{1}{2}\sum_{i=1}^{n}\mathbf{q}_i^T\mathbf{q}_i + \mathbf{q}'_i^T R^T R\mathbf{q}'_i - 2\mathbf{q}_i^T R\mathbf{q}'_i \\
-                &\Rightarrow \max_R \sum_{i=1}^{n} \mathbf{q}_i^T R \mathbf{q}'_i
+            \min_R \frac{1}{2}\sum_{i=1}^{n}\|\mathbf{q}_i - R\mathbf{q}'_i\|^2
+            &= \frac{1}{2}\sum_{i=1}^{n} \big( \mathbf{q}_i^T\mathbf{q}_i
+                + (\mathbf{q}'_i)^T R^T R\,\mathbf{q}'_i
+                - 2\mathbf{q}_i^T R\mathbf{q}'_i \big) \\
+            &\Rightarrow \max_R \sum_{i=1}^{n} \mathbf{q}_i^T R \mathbf{q}'_i
             \end{align*}
             定义矩阵：
             \[
@@ -474,10 +476,8 @@
                                                         \label{fig:orb_centroid}
                                                     \end{minipage}
                                                 \end{figure}
-                                                \begin{enumerate}
-                                                    \item \textbf{FAST}：Features from Accelerated Segment Test，以像素点为中心一定半径的圆上，有连续N个点与像素灰度值差大于阈值
-                                                    \item \textbf{Oriented FAST}：FAST的优化，通过构建\textbf{图像金字塔}\footnote{在不同尺度（图像大小）下都能检测到稳定的特征点，将原始图像逐层下采样，形成多层图像，使物体在图像中变大或变小，检测出的关键点位置仍然一致。}和\textbf{灰度质心法}\footnote{它通过计算角点邻域的灰度质心（intensity centroid）来求出主方向角，根据灰度值总和与坐标-灰度值乘积总和计算质心坐标。无论图像如何旋转，ORB都会调整描述子的方向，使得特征点的描述结果保持一致}使特征具有\textbf{尺度不变性和旋转不变性}
-                                                \end{enumerate}
+                                                \textbf{FAST}：Features from Accelerated Segment Test，以像素点为中心一定半径的圆上，有连续N个点与像素灰度值差大于阈值
+                                                \textbf{Oriented FAST}：FAST的优化，通过构建\textbf{图像金字塔}\footnote{在不同尺度（图像大小）下都能检测到稳定的特征点，将原始图像逐层下采样，形成多层图像，使物体在图像中变大或变小，检测出的关键点位置仍然一致。}和\textbf{灰度质心法}\footnote{它通过计算角点邻域的灰度质心（intensity centroid）来求出主方向角，根据灰度值总和与坐标-灰度值乘积总和计算质心坐标。无论图像如何旋转，ORB都会调整描述子的方向，使得特征点的描述结果保持一致}使特征具有\textbf{尺度不变性和旋转不变性}
 
                                         \end{itemize}
                                     \item \textbf{描述子}:\textbf{BRIEF} (Binary Robust Independent Elementary Feature)
@@ -494,15 +494,14 @@
                                     \item \textbf{单向匹配}：将第一帧图像中的所有特征与第二帧图像中的所有特征进行比较，相似度在阈值范围内的\textbf{建立对应关系}
                                     \item \textbf{反向匹配}：由于第一帧图像中的特征可能在第二帧图像中找到多个对应，因此需要进行\textbf{交叉一致性验证}，即第二帧图像中的所有特征与第一帧图像中的所有特征进行比较，建立对应关系，当彼此相互存在对应关系时才认为匹配
                                 \end{enumerate}
-                            \item \textbf{增加约束条件}：核心目的是限制搜索区域
-                            \begin{enumerate}
-                                \item \textbf{区域约束}：根据运动预测
+                            \item \textbf{增加约束条件}：核心目的是限制搜索区域\\
+                            \noindent\textbullet\quad{区域约束}：根据运动预测
                                 \begin{itemize}
                                     \item \textbf{特征点}：需要具备\textbf{三维空间位置}信息；
                                     \item \textbf{适用性}：适用于\textbf{运动偏移量较小、图像变化较小}的情况；
                                     \item 若要在\textbf{长图像序列}上采用跟踪策略，则需对每个特征建立\textbf{仿射变形模型}\footnote{以描述随时间的尺度、旋转和视角变化}；
                                 \end{itemize}
-                                \item \textbf{极线约束}：根据立体视觉
+                            \noindent\textbullet\quad \textbf{极线约束}：根据立体视觉
                                 \begin{itemize}
                                     \item \textbf{特征点}：\textcolor{red}{不}需要具备\textbf{三维空间位置}信息，特征非三维。
                                     \item \textbf{适用性}：适用于\textbf{运动偏移量较小、图像变化较小}的情况；
@@ -512,41 +511,20 @@
                                                     \includegraphics[width=0.5\textwidth]{images/jixian.png}
                                                     \caption{立体视觉}
                                                 \end{figure}
-                            \end{enumerate}
                         \end{enumerate}
                     \item \textbf{Step3:运动估计} 
     \begin{itemize}
         \item \textbf{基本思路}：通过\textbf{两帧或多帧图像中的特征点匹配关系}，估计相机在不同时间的\textbf{位姿变化（R, t）}\footnote{这一部分是整个视觉里程计与SLAM系统中“从特征匹配过渡到几何估计”的核心环节，是视觉运动估计的基础。}
 
         \item \textbf{根据相机类型的分类方法}：
-        \begin{enumerate}
-            \item \textbf{单目相机（Monocular Camera）}
-            \begin{itemize}
-                \item 仅有\textbf{2D像素坐标}；
-                \item 根据两组2D点的对应关系估计相机运动，属于\textbf{2D-to-2D}问题；
-                \item 方法：\textbf{对极几何（Epipolar Geometry）}方法。
-            \end{itemize}
+\begin{enumerate} \item \textbf{单目相机（Monocular Camera）} \begin{itemize} \item 仅有\textbf{2D像素坐标}； \item 根据两组2D点的对应关系估计相机运动，属于\textbf{2D-to-2D}问题； \item 方法：\textbf{对极几何（Epipolar Geometry）}方法。 \end{itemize} \item \textbf{双目 / RGB-D 相机（Stereo or RGB-D Camera）} \begin{itemize} \item 每个像素都具有\textbf{距离信息}； \item 根据两组3D点估计相机运动，属于\textbf{3D-to-3D}问题； \item 方法：\textbf{ICP}方法。 \end{itemize} \item \textbf{具有三维点及其投影位置的相机（PnP Problem）} \begin{itemize} \item \textbf{3D-to-2D}关系； \item 方法：PnP方法。 \end{itemize} \end{enumerate}
 
-            \item \textbf{双目 / RGB-D 相机（Stereo or RGB-D Camera）}
-            \begin{itemize}
-                \item 每个像素都具有\textbf{距离信息}；
-                \item 根据两组3D点估计相机运动，属于\textbf{3D-to-3D}问题；
-                \item 方法：\textbf{ICP}方法。
-            \end{itemize}
-
-            \item \textbf{具有三维点及其投影位置的相机（PnP Problem）}
-            \begin{itemize}
-                \item \textbf{3D-to-2D}关系；
-                \item 方法：PnP方法。
-            \end{itemize}
-        \end{enumerate}
 
         \item \textbf{2D-to-2D：对极几何}
         \\接下来对于这种情况，我们先给出一些前置的公式基础推导，之后在此基础上说明运动估计的求解步骤。
         \begin{itemize}
             \item \textbf{公式基础}：
                 \begin{enumerate}
-
                     \item 相机模型：针孔模型下，有归一化坐标
                     \[
                     x_1 = K^{-1} \tilde{p}, \quad x_2 = K^{-1} p,
@@ -570,7 +548,7 @@
             \end{enumerate}
         \end{itemize}
         \begin{small}\kaishu
-        \\==============================
+        ==============================\\
         \item \textbf{本质矩阵的求解：八点法}
         \\$E$ 在不同尺度下等价，因此仅需8对匹配点即可求解——称为\textbf{八点法}
         \begin{itemize}
@@ -610,7 +588,7 @@
             \]
             \item 由此可求得 $E$ 的各元素。
         \end{itemize}
-        \\==============================
+        ==============================\\
         \item \textbf{从 $E$ 估计 $R, t$}
         \begin{itemize}
             \item 采用\textbf{SVD分解方法}：
@@ -624,18 +602,14 @@
                                                     \includegraphics[width=0.7\textwidth]{images/SVD.png}
                                                     \caption{从E分解到R、t存在四种可能性}
                                                 \end{figure}
-        \\==============================
+        ==============================\\
         \item \textbf{关于错误匹配与RANSAC优化}
-        \begin{itemize}
+        \begin{enumerate}
             \item \textbf{问题}：当匹配点数量多于8对时，可能包含错误匹配；
             \item \textbf{解决}：采用\textbf{RANSAC（Random Sample Consensus）}算法进行鲁棒估计\footnote{RANSAC通过随机采样与一致性检验，有效剔除误匹配点，提高姿态估计的稳定性。}；
-            \item 判定内点的准则：
-            \begin{enumerate}
-                \item 点到极线的距离在阈值范围内；
-                \item 图像特征射线与极平面之间的夹角在阈值范围内。
-            \end{enumerate}
-        \\==============================
-        \end{itemize}
+            \item 判定内点的准则：(1)点到极线的距离在阈值范围内；(2)图像特征射线与极平面之间的夹角在阈值范围内。
+        ==============================\\
+        \end{enumerate}
         \end{itemize}
         \end{small}
         \item \textbf{2D-to-2D 对极几何的局限性}
