@@ -103,6 +103,7 @@
         \item 存储大规模环境的图片需要较大的\textbf{存储空间}
         \item 对于实际环境中存在路标被破坏/污染、更换、稀疏等风险
     \end{itemize}
+\end{enumerate}
 \newpage
 \subsection*{概统知识回顾}
 \hspace{2em}在正式开始对马尔可夫自定位的介绍之前，我们最好回顾一下相关概率论与数理统计的知识基础；本部分是我自己加的\footnote{本节参考自ZJUDancer视觉组内训，https://www.bilibili.com/video/BV1wUmPYCERx/?spm_id_from=333.337.search-card.all.click&vd_source=5deca47094767260f853b759a625a68f}，对此感到熟悉的同学可以直接跳过到\hyperref[sec:markov]{控制感知信息融合的的自定位}继续阅读。
@@ -123,6 +124,52 @@
             \item 对随机事件 \( \mathrm{A},\mathrm{B},\mathrm{C} \) ,若 \( P\left( {A \mid  C}\right)  > 0 \) ,有
             $$ P\left( {B \mid  A,C}\right)  = \frac{P\left( {B \mid  C}\right) P\left( {A \mid  B,C}\right) }{P\left( {A \mid  C}\right) } $$
         \end{itemize}
+
+        \item \textbf{随机变量和与积的期望与方差}：
+
+    设随机变量 $X,Y$ 的均值与方差分别为 $\mu_X,\sigma_X^2$ 与 $\mu_Y,\sigma_Y^2$，协方差为
+    $\operatorname{Cov}(X,Y)=\mathbb{E}[(X-\mu_X)(Y-\mu_Y)]$。有如下恒等式：
+    
+    \begin{enumerate}
+      \item \textbf{一般恒等式（不要求独立）：}
+      \begin{align}
+        \mathbb{E}[X+Y] &= \mathbb{E}[X]+\mathbb{E}[Y],\\
+        \operatorname{Var}(X+Y) &= \operatorname{Var}(X)+\operatorname{Var}(Y)+2\,\operatorname{Cov}(X,Y),\\
+        \mathbb{E}[XY] &= \operatorname{Cov}(X,Y)+\mathbb{E}[X]\mathbb{E}[Y],\\
+        \operatorname{Var}(aX+b) &= a^2\,\operatorname{Var}(X)\quad(\text{$a,b$ 常数}),\\
+        \operatorname{Cov}(aX+b,\;cY+d) &= ac\,\operatorname{Cov}(X,Y).
+      \end{align}
+      标准差由方差取平方根得到：$\operatorname{Std}(Z)=\sqrt{\operatorname{Var}(Z)}$。
+    
+      \item \textbf{独立情形（$X \perp\!\!\!\perp Y$）的化简：}
+      \[
+        \operatorname{Cov}(X,Y)=0,\qquad
+        \mathbb{E}[XY]=\mathbb{E}[X]\mathbb{E}[Y]=\mu_X\mu_Y.
+      \]
+      因而
+      \begin{align}
+        \operatorname{Var}(X+Y) &= \sigma_X^2+\sigma_Y^2,\\
+        \operatorname{Std}(X+Y) &= \sqrt{\sigma_X^2+\sigma_Y^2},\\
+        \operatorname{Var}(XY) &= \mathbb{E}[X^2]\mathbb{E}[Y^2]-\big(\mathbb{E}[X]\mathbb{E}[Y]\big)^2 \nonumber\\
+          &= (\sigma_X^2+\mu_X^2)(\sigma_Y^2+\mu_Y^2)-\mu_X^2\mu_Y^2 \nonumber\\
+          &= \sigma_X^2\sigma_Y^2+\mu_Y^2\sigma_X^2+\mu_X^2\sigma_Y^2,\\
+        \operatorname{Std}(XY) &= \sqrt{\sigma_X^2\sigma_Y^2+\mu_Y^2\sigma_X^2+\mu_X^2\sigma_Y^2}.
+      \end{align}
+    
+      \item \textbf{高斯（正态）情形的特殊运算：}
+      \begin{itemize}
+        \item 若 $X\sim\mathcal{N}(\mu_X,\sigma_X^2)$，$Y\sim\mathcal{N}(\mu_Y,\sigma_Y^2)$ 且独立，则
+        \[
+          X+Y \sim \mathcal{N}\big(\,\mu_X+\mu_Y,\;\sigma_X^2+\sigma_Y^2\,\big).
+        \]
+        更一般地，$aX+b \sim \mathcal{N}(a\mu_X+b,\;a^2\sigma_X^2)$。
+        \item \textbf{关于积：} 当 $X,Y$ 独立且高斯时，$XY$ 的分布不再是高斯（称为“正态积分布”），
+        但其前两阶矩可由上式给出：
+        \[
+          \mathbb{E}[XY]=\mu_X\mu_Y,\qquad
+          \operatorname{Var}(XY)=\sigma_X^2\sigma_Y^2+\mu_Y^2\sigma_X^2+\mu_X^2\sigma_Y^2.
+        \]
+      \end{itemize}
 
         \item \textbf{马尔可夫性}：下一时刻的状态只与当前状态有关，与上一时刻状态无关。
         \item \textbf{马尔可夫过程}：具有马尔可夫定性的过程，即：
@@ -435,7 +482,8 @@ $$
                 \includegraphics[width=0.6\textwidth]{images/alpha.png}
                 \caption{不同$\alpha_i$参数下通过\textbf{随机采样求解}得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$，每个子图含500个样本；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
                 \end{figure}
-    \end{enumerate}
+        
+\end{enumerate}
     \item \textbf{速度运动模型}\\
     我们的最终目的是计算出$$p(\mathrm{x}_t|\mathrm{x}_{t-1},\mathrm{u}_{t-1})$$
     在速度运动模型中，我们认为$\mathrm{u}_{t-1}$是$(v,\omega)$
@@ -488,13 +536,13 @@ $$
             \item 重复上述过程，所得 $\mathbf{x}_t$ 点集合构成为对 $\mathbf{x}_t$ 的概率分布描述
         \end{enumerate}
 \end{enumerate}
-
+\end{enumerate}
 
         
 \vspace{2em}
 \textbf{仅用运动模型存在问题}：\\
 \textcolor{red}{如果只考虑运动模型进行位姿估计，其不确定性（方差）会不断地无上限增大}
-                    \begin{figure}[H]
+                \begin{figure}[H]
                     \centering
                     \includegraphics[width=0.4\textwidth]{images/unsure.png}
                     \caption{只用运动模型，误差不断累积}
@@ -507,11 +555,328 @@ $$
         \, p(\mathbf{x}_{t-1} \mid \mathbf{Z}^{t-1}, \mathbf{U}^{t-2}, \mathbf{m})
         \, d\mathbf{x}_{t-1}
         \]
-            
+        因为测量值=真实值+误差，我们希望同样利用误差分布进行建模。根据误差概率获得在$\mathbf{x}_t$观测到$\mathbf{z}_t$的可能性。由此来评估运动模型的$\mathbf{x}_t$是否准确。
+    \begin{enumerate}
+        \item \textbf{特征传感器模型和观测模型}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.6\textwidth]{images/3lubiao.png}
+                        \caption{例如地图中存在三个物体，传感器对这三个物体分别观测其与机器人的距离$r$和夹角$\theta$，这两个变量相互独立且各自可建模为均值为0，标准差为$\sigma$的高斯分布}
+                    \end{figure}
+        
+        \begin{enumerate}
+            \item \textbf{定义}：
+            \begin{itemize}
+                \item 特征地图表示：$\mathbf{m}=\{\mathbf{m}_1,\mathbf{m}_2,\cdots,\mathbf{m}_N\}$\footnote{$\mathbf{m}_i$可以理解为每一个地图中的实际特征物体}， 在地图中的坐标为$\ (m_{ix},m_{iy})^{\mathsf T}$。
+                \item $t$时刻的特征观测表示为：$\mathbf{z}_t=\{\,\mathbf{f}_t^{1},\mathbf{f}_t^{2},\ldots,\mathbf{f}_t^{K}\,\}$。
+                \item $\mathbf{f}_t^{i}\triangleq\big(r_t^{i},\,\varphi_t^{i},\,s_t^{i}\big)^{\mathsf T}$
+                \footnote{$\mathbf{f}_t^{i}$可以理解为机器人对每一个实际物体得到的测量特征}\\其中：
+                \\$r_t^{i}$：特征与机器人之间的相对距离；
+                \\$\varphi_t^{i}$：特征与机器人之间的相对角度；
+                \\$s_t^{i}$：特征标识。
+            \end{itemize}
+        
+            \item \textbf{观测独立}：假设每一个特征的观测条件独立，
+            \[
+                p(\mathbf{z}_t\mid \mathbf{x}_t,\mathbf{m})
+                =p\!\big(\mathbf{f}_t^{1},\mathbf{f}_t^{2},\ldots,\mathbf{f}_t^{K}\mid \mathbf{x}_t,\mathbf{m}\big)
+                =\prod_{k=1}^{K}p\!\big(\mathbf{f}_t^{k}\mid \mathbf{x}_t,\mathbf{m}\big).
+            \]
+        
+            \item \textbf{特征的观测模型}\,$p(\mathbf{f}_t^{i}\mid \mathbf{x}_t,\mathbf{m})$：
+            \begin{itemize}
+                \item 假设$\mathbf{f}_t^{i}$对应的地图特征为$\mathbf{m}_j$，将地图特征$\mathbf{m}_j$转换到机器人坐标系下即为观测特征真值：
+                \[
+                \hat{\mathbf{f}}_t^{\,i}=
+                \begin{pmatrix}
+                    \sqrt{(m_{jx}-x)^2+(m_{jy}-y)^2}\\[2pt]
+                    \operatorname{arctan2}(m_{jy}-y,\,m_{jx}-x)-\theta\\[2pt]
+                    s_{j}
+                \end{pmatrix},
+                \qquad 
+                \mathbf{x}_t=(x,\,y,\,\theta)^{\mathsf T}.
+                \]
+                \item 测量值$=$真实值$+$误差：$\mathbf{f}_t^{\,i}=\hat{\mathbf{f}}_t^{\,i}+\tilde{\boldsymbol\delta}_f$，且$\,\tilde{\delta}\sim\mathcal{N}(\delta;0,\sigma^{2})$\footnote{我们仍建模误差就是一个零均值、方差$\sigma^{2}$的高斯分布。}；
+                \item 根据观测误差模型，则
+                \footnote{$\hat{\mathbf{f}}_t^{\,i}$是个常量，误差是个高斯分布的变量，两者加起来还是高斯分布}
+                \[
+                    p\!\big(\mathbf{f}_t^{i}\mid \mathbf{x}_t,\mathbf{m}\big)=\mathcal{N}\!\big(\mathbf{f}_t^{i};\,\hat{\mathbf{f}}_t^{\,i},\,\sigma_f^{2}\big).
+                \]
+            \end{itemize}
+        \end{enumerate}
+        
+        \item \textbf{基于物理建模的激光束模型}
+
+对于一次激光测量，可能遇到以下四种情况：
+\begin{itemize}
+    \item 正确测量（带有小测量噪声）
+    \item 临时障碍\footnote{例如一个人走了过去}
+    \item 未检测到物体
+    \item 随机误差
+\end{itemize}
+
+那么我们可以将其观测模型拆解为以上四个部分：
+\begin{flalign*}
+& p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)= &&
+\end{flalign*}
+$$
+\alpha_{\mathrm{hit}}\,p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
++\alpha_{\mathrm{short}}\,p_{\mathrm{short}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
++\alpha_{\mathrm{max}}\,p_{\mathrm{max}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
++\alpha_{\mathrm{rand}}\,p_{\mathrm{rand}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right),
+$$
+\vspace{1em}
+其中，$\alpha_{\mathrm{hit}}+\alpha_{\mathrm{short}}+\alpha_{\mathrm{max}}+\alpha_{\mathrm{rand}}=1.$
+
+\noindent 等价表达（对类别变量求和）：
+\[
+p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
+=\sum_{c} p\!\left(z_t^{k},c\mid \mathbf{x}_t,\mathbf{m}\right)
+=\sum_{c} p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m},c\right)p\!\left(c\mid \mathbf{x}_t,\mathbf{m}\right)
+=\sum_{c} p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m},\alpha\right)p(c),
+\]
+其中 $c\in\{\mathrm{hit},\mathrm{short},\mathrm{max},\mathrm{rand}\}$，且 $p(c)\in\{\alpha_{\mathrm{hit}},\alpha_{\mathrm{short}},\alpha_{\mathrm{max}},\alpha_{\mathrm{rand}}\}$。
+
+具体而言，四部分模型可以分别进行建模：
 \begin{enumerate}
-    \item \textbf{特征传感器模型和观测模型}
-    \item \textbf{基于物理建模的激光传感器模型}
-    \item \textbf{基于Likelihood Field的激光束模型}
+    \item \textbf{带少量噪声的正确测量数据的概率模型}
+    \begin{itemize}
+        \item \textbf{建模思想}：可以被建模为真实距离的\textbf{高斯分布}，其中真实距离可以通过\textbf{光线追踪算法}获得。
+        \item \textbf{建模模型}：
+        \[
+        p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=
+        \begin{cases}
+            \eta\,\mathcal{N}\!\left(z_t^{k};\,z_{t}^{k*},\,\sigma_{\mathrm{hit}}^{2}\right), & 0\le z_t^{k}\le z_{\max},\\[2pt]
+            0, & \text{otherwise},
+        \end{cases}
+        \qquad
+        \]
+        其中，
+        \[\eta=\left(\displaystyle\int_{0}^{z_{\max}}\mathcal{N}\!\left(z;\,z_{t}^{k*},\,\sigma_{\mathrm{hit}}^{2}\right)\mathrm{d}z\right)^{-1}.
+        \]
+        用于归一化，确保概率积分后是1。\\
+        此外：\\
+        $z_{t}^{k*}$——通过光线追踪算法获得的真实距离；
+        \\$z_{\max}$——最大测量距离。
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/guance1.png}
+            \caption{带少量噪声的正确测量数据的概率模型（均值为真实距离的高斯分布）}
+        \end{figure}
+    \end{itemize}
+
+    \item \textbf{临时障碍的测量数据的概率模型}
+    \begin{itemize}
+        \item \textbf{建模思想}：临时障碍往往导致测距仅得到非常短的数据，且随着距离的增大概率降低，因此可以建模为\textbf{截断的指数分布}。
+        \item \textbf{建模模型}：
+        \[
+        p_{\mathrm{short}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=
+        \begin{cases}
+            \eta\,\lambda_{\mathrm{short}}\,e^{-\lambda_{\mathrm{short}} z_t^{k}}, & 0\le z_t^{k}\le z_{t}^{k*},\\[2pt]
+            0, & \text{otherwise},
+        \end{cases}
+        \qquad
+        \]
+        其中：
+        \[
+        \eta=\left(\displaystyle\int_{0}^{z_{t}^{k*}}\lambda_{\mathrm{short}} e^{-\lambda_{\mathrm{short}} z}\,\mathrm{d}z\right)^{-1}
+        =(1-e^{-\lambda_{\mathrm{short}} z_{t}^{k*}})^{-1}.
+        \]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/guance2.png}
+            \caption{临时障碍的测量数据的概率模型（截断的指数分布）}
+        \end{figure}
+    \end{itemize}
+
+    \item \textbf{达到最大距离的测量数据的概率模型}
+    \begin{itemize}
+        \item \textbf{建模思想}：需要建模为一个伪概率分布，因为其数据只存在于一个值。
+        \item \textbf{建模模型}：
+        \[
+        p_{\mathrm{max}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=
+        \begin{cases}
+            1, & z_t^{k}=z_{\max},\\
+            0, & \text{otherwise}.
+        \end{cases}
+        \]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/guance3.png}
+            \caption{达到最大距离的测量数据的概率模型（观测范围内恒为0）}
+        \end{figure}
+    \end{itemize}
+
+    \item \textbf{随机错误测量数据的概率模型}
+    \begin{itemize}
+        \item \textbf{建模思想}：可以建模为\textbf{均匀分布}，因为错误测量主要来自反射或串扰等传播问题，其机理建模较为复杂。
+        \item \textbf{建模模型}：
+        \[
+        p_{\mathrm{rand}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=
+        \begin{cases}
+            \dfrac{1}{z_{\max}}, & 0\le z_t^{k}<z_{\max},\\[6pt]
+            0, & \text{otherwise}.
+        \end{cases}
+        \]
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/guance4.png}
+            \caption{随机错误测量数据的概率模型（均匀分布）}
+        \end{figure}
+    \end{itemize}
+    合成以上四种模型，得到观测模型概率分布：
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.35\linewidth]{images/guance5.png}
+            \caption{基于物理建模的激光束模型四种模型合成后的伪分布}
+        \end{figure}
 \end{enumerate}
+            \begin{itemize}
+            \item \textbf{激光束模型参数确定}
+            \begin{itemize}
+                \item 模型中需要确定的参数
+                \begin{itemize}
+                    \item \textbf{概率分布本身的参数}
+                    $\sigma_{\mathrm{hit}}^{2},\,\lambda_{\mathrm{short}}$
+                    \item 四种数据模型混合的权值 $\alpha_{\mathrm{hit}},\,\alpha_{\mathrm{short}},\,\alpha_{\mathrm{max}},\,\alpha_{\mathrm{rand}}$
+                \end{itemize}
+                \item \textbf{参数确定方法}
+                \begin{itemize}
+                    \item 正常环境下，确定机器人的位置，给定一个与机器人距离已知的目标，然后利用激光测距仪测量目标，得到测量值，反复多次，得到大量数据样本
+                    \item 根据样本，基于最大化样本集概率分布的思想，进行统计和学习
+                \end{itemize}
+                \item \textbf{数学描述}
+                    \[
+                    \max_{\Theta}\; p\!\left(\mathbf{Z}\mid \mathbf{X},\mathbf{m},\Theta\right),\qquad
+                    \Theta=\left\{\sigma_{\mathrm{hit}}^{2},\,\lambda_{\mathrm{short}},\,\alpha_{\mathrm{hit}},\,\alpha_{\mathrm{short}},\,\alpha_{\mathrm{max}},\,\alpha_{\mathrm{rand}}\right\},
+                    \]
+                    
+                    $\mathbf{Z}=\{z_i\}$ \text{为采集到的激光束样本集合}\\
+                    $\mathbf{X}=\{\mathbf{x}_i\}$ \text{为对应的观测位姿集合}\\
+                    $\mathbf{m}$ \text{为地图}.
+                    
+            \end{itemize}
+                \item \textbf{优点}：
+                \begin{itemize}
+                    \item 物理意义非常明确
+                    \item 对地图形式没有要求
+                \end{itemize}
+                \item \textbf{缺点}：
+                \begin{itemize}
+                    \item 计算：光线追踪算法耗时较大
+                    \item 光滑性差：当地图中有很多小障碍物时，概率分布连续性很差，使得定位算法难以收敛
+                \end{itemize}                
+            \end{itemize}
+ \item \textbf{基于LIKELIHOOD FIELD的激光束模型}
+ \begin{itemize}
+     \item \textbf{基本思想}：
+     \begin{itemize}
+         \item 把激光束末端投影于地图中
+         \item 根据激光束末端投影与地图中最近物体之间距离建模
+         \item 为减少在线计算量，根据地图离线构建Likelihood Field图
+     \end{itemize}
+        {\small\kaishu
+        类似前面的运动模型的闭式求解与随机采样的正逆模型；\\
+        \vspace{1em}
+        光线追踪束模型：光线追踪给出应当的测距 $z_{t}^{k*}$，机器人获得观测 $z_t^k$，用$\alpha_{\mathrm{hit}},\alpha_{\mathrm{short}},\alpha_{\mathrm{max}},\alpha_{\mathrm{rand}}$
+        的混合分布为不同观测值赋予概率，从而评估“观测成这样有多合理”；\\
+        \vspace{1em}
+        Likelihood Field：直接把观测 $z_t^k$ 沿该束方向在位姿 $\mathbf{x}_t$ 下投影到地图端点
+        $\mathbf{p}_{t}^{k}$，查询预先计算好的距离场 $D(\cdot)$ 得到
+        $d=D(\mathbf{p}_{t}^{k})$，并用
+        $p(z_t^k\mid\mathbf{x}_t,\mathbf{m})\propto\exp(-d^{2}/2\sigma^{2})$
+        评估“观测成这样有多合理”（各束条件独立时取乘积）。}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/Likelyhood.png}
+        \caption{likelihood field图（右），白色表示概率高}
+    \end{figure}
+    \begin{enumerate}
+      \item \textbf{概率描述}：
+      \[
+      p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
+      =\alpha_{\mathrm{hit}}\,p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
+      +\alpha_{\mathrm{max}}\,p_{\mathrm{max}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)
+      +\alpha_{\mathrm{rand}}\,p_{\mathrm{rand}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right),
+      \]
+      其中：\\
+      $\alpha_{\mathrm{hit}}+\alpha_{\mathrm{max}}+\alpha_{\mathrm{rand}}=1$\\
+      $z_t^{k}$——一次激光测量的数据；\\
+      因无法考虑临时障碍物（预先建图），所以取消
+      $p_{\mathrm{short}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)$。
+    
+      \item \textbf{末端投影距离建模}\\
+      \,$p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)$：
+      记 $z_t^{k}$ 末端在地图中的坐标为 $\bigl(x_{z_t^{k}},y_{z_t^{k}}\bigr)^{\mathsf T}$，
+      寻找地图中与该坐标最近的物体，计算两者间距
+      \[
+      \mathrm{dist}=\arg\min_{\ (m_x,m_y)\ \text{is occupied in map}}
+      \sqrt{(m_x-x_{z_t^{k}})^{2}+(m_y-y_{z_t^{k}})^{2}},
+      \]
+      \[
+      p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=\mathcal{N}\!\left(\mathrm{dist};\,0,\,\sigma^{2}\right).
+      \]
+    
+    
+      \item \textbf{基于栅格地图的\;LIKELIHOOD FIELD\;建立}：
+      预先建立。对于栅格地图中的每一个未占用栅格，搜索距离最近的占用栅格，计算高斯分布下的概率赋给该未占用栅格\footnote{%
+\textbf{距离场（offline）}\;先对占据栅格地图做欧氏距离变换（EDT），得每个栅格到最近障碍物的距离
+\[
+d(\mathbf{c})=\min_{\mathbf{o}\in\mathcal{O}}\;\lVert \mathbf{c}-\mathbf{o}\rVert_2 .
+\]
+\textbf{似然场（由距离场映射）}\;用零均值高斯核把“越靠近障碍物越合理”转为命中似然
+\[
+p_{\mathrm{hit}}(\mathbf{c})=\eta\,\exp\!\Big(-\tfrac{d(\mathbf{c})^2}{2\sigma^2}\Big),
+\quad
+\eta^{-1}=\!\!\sum_{\mathbf{c}}\exp\!\Big(-\tfrac{d(\mathbf{c})^2}{2\sigma^2}\Big).
+\]
+\textbf{在线评估}\;把激光端点投到地图坐标 $\mathbf{p}$，查表 $p_{\mathrm{hit}}(\mathbf{p})$，再与
+\[
+p_{\mathrm{max}}(z)=\mathbb{I}[z=z_{\max}],\qquad
+p_{\mathrm{rand}}(z)=\begin{cases}1/z_{\max},&0\le z<z_{\max},\\[2pt]0,&\text{otherwise}\end{cases}
+\]
+按权重混合即可：
+\[
+p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)=
+\alpha_{\mathrm{hit}}\,p_{\mathrm{hit}}(\mathbf{p})
++\alpha_{\mathrm{max}}\,p_{\mathrm{max}}(z_t^{k})
++\alpha_{\mathrm{rand}}\,p_{\mathrm{rand}}(z_t^{k}),
+\quad \alpha_{\mathrm{hit}}+\alpha_{\mathrm{max}}+\alpha_{\mathrm{rand}}=1.
+\]
+}%
+，最后给未知栅格赋值 $1/z_{\max}$。
+    
+      \item \textbf{基于\;LIKELIHOOD FIELD\;的激光束模型}：
+      图中激光束的正确测量传感器概率分布 $p_{\mathrm{hit}}\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)$；
+      结合最大测量和随机误差模型后的概率分布
+      $p\!\left(z_t^{k}\mid \mathbf{x}_t,\mathbf{m}\right)$。
+
+    \end{enumerate}
+\end{itemize}
+    \begin{itemize}
+        \item \textbf{优点}：
+        \begin{itemize}
+            \item 在线计算量小；
+            \item 平滑性好\footnote{基于物理建模的激光束模型的高斯分布是在\textbf{激光束方向}上，隐含的假设是物体的不确定性只存在于激光束方向上，满足激光束测量的物理意义，但造成平滑性非常差；基于\emph{Likelihood Field} 的激光束模型的高斯分布是在\textbf{障碍物周围}，即假设障碍物的不确定性遍布它的四周，更符合实际情况。}，可确保算法收敛\footnote{物理束模型沿射线与栅格/遮挡相交会产生大量不连续跳变，目标面粗糙、梯度差，优化/滤波更易发散或不收敛。}
+        \end{itemize}
+        \item \textbf{缺点}：
+        \begin{itemize}
+            \item 没有明确的物理意义；
+            \item 无法建模人等临时动态障碍造成的错误测量，适用于人流较少时的实际应用。
+        \end{itemize}
+          
+      
+    
+     
+    
+
+
+
+ \end{itemize}
+
+
+
+
+            
 \end{enumerate}
 \end{document}
