@@ -1,7 +1,7 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 \section{马尔可夫实时自定位计算}
-$$p(\mathbf{x}_{t}|\mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})=\eta p(\mathbf{z}_{t}|\mathbf{x}_{t},\mathbf{m})\int p(\mathbf{x}_{t}|\mathbf{x}_{t-1},\mathbf{u}_{t-1},\mathbf{m})p(\mathbf{x}_{t-1}|\mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})d\mathbf{x}_{t-1}$$
+\[ p(\mathbf{x}_{t}|\mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})=\eta p(\mathbf{z}_{t}|\mathbf{x}_{t},\mathbf{m})\int p(\mathbf{x}_{t}|\mathbf{x}_{t-1},\mathbf{u}_{t-1},\mathbf{m})p(\mathbf{x}_{t-1}|\mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})d\mathbf{x}_{t-1} ) \]
 \subsection{求解步骤}
 \begin{itemize}
     \item 位姿预估 prediction（这里我们将这一项记作$\bar{p}$）
@@ -454,13 +454,392 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
         \item \textbf{问题}：一般情况下$c^i_t$未知
         \item \textbf{解决办法}：maximum likelihood correspndence
         $$\hat{c}_t = \arg\max_{c_t} p(\mathbf{z}_t | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})$$
-        为避免指数级的巨大计算量，单独估计每个特征的最大可能对应
+        为避免指数级的巨大计算量，单独估计每个特征的最大可能对应\footnote{这是一个简化，是不相等的，在这种情况下，可能出现情况：A与某物体最大关联，B可能同时与该物体最大关联}
         $$
         \hat{c}_t^i = \arg\max_{c_t^i} p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})$$
         $$\approx \arg\max_{c_t^i} \mathscr{N} \left( \mathbf{z}_t^i; h(\bar{\mathbf{\mu}}_t, c_t^i, \mathbf{m}), \mathbf{H}_t^i \bar{\mathbf{\Sigma}}_t \mathbf{H}_t^{iT} + \mathbf{Q}_t \right)$$
+        \textbf{推导过程}：
+        {\small\kaishu{
+        \begin{enumerate}
+          \item 目标估计问题：
+          $$\hat{c}_t^i=\arg\max_{c_t^i} p\big(z_t^i \mid C^t, m, Z^{t-1}, U^{t-1}\big).$$
+        
+          \item 预测先验（状态的预测分布，高斯假定）：
+          $$p(x_t\mid Z^{t-1},U^{t-1})\approx\mathcal{N}\big(x_t;\,\bar\mu_t,\bar\Sigma_t\big).$$
+        
+          \item 观测模型与线性化：设
+          $$z_t^i=h(x_t,c_t^i,m)+v_t,\qquad v_t\sim\mathcal{N}(0,Q_t).$$
+          在$x_t=\bar\mu_t$处一阶泰勒展开：
+          $$h(x_t,c_t^i,m)\approx h(\bar\mu_t,c_t^i,m)+H_t^i\,(x_t-\bar\mu_t),$$
+          其中
+          $$H_t^i=\left.\frac{\partial h(x,c_t^i,m)}{\partial x}\right|_{x=\bar\mu_t}.$$
+        
+          \item 由线性化得到观测的预测分布（高斯传播）：
+          $$p(z_t^i\mid C^t,m,Z^{t-1},U^{t-1})\approx
+            \mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),\;S_t^i\big),$$
+          其中
+          $$S_t^i=H_t^i\,\bar\Sigma_t\,{H_t^i}^\top+Q_t.$$
+        
+          \item 将极大化似然转为对数似然并化简：对每个候选关联$c_t^i$，
+          $$\begin{aligned}
+            \hat{c}_t^i
+            &=\arg\max_{c_t^i}\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),S_t^i\big)\\
+            &=\arg\min_{c_t^i}\Big\{\;-\ln\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),S_t^i\big)\;\Big\}\\
+            &=\arg\min_{c_t^i}\Big\{\tfrac{1}{2}(z_t^i-h(\bar\mu_t,c_t^i,m))^\top {S_t^i}^{-1}(z_t^i-h(\bar\mu_t,c_t^i,m))
+              +\tfrac{1}{2}\ln|S_t^i|\Big\},
+          \end{aligned}$$
+          其中常数项已省略。
+        
+          \item 若各候选的协方差$S_t^i$相近，可进一步简化为仅比较马氏距离：
+          $$\hat{c}_t^i=\arg\min_{c_t^i}\;(z_t^i-h(\bar\mu_t,c_t^i,m))^\top {S_t^i}^{-1}(z_t^i-h(\bar\mu_t,c_t^i,m)).$$
+        
+          \item 因此得到近似表达：
+          $$\hat{c}_t^i\approx\arg\max_{c_t^i}\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),\;H_t^i\bar\Sigma_t{H_t^i}^\top+Q_t\big).$$
+        \end{enumerate}
+        }}
     \end{itemize}
-
+    
     
 \end{enumerate}
 \subsection{粒子滤波定位法（PF）}
+\begin{enumerate}
+    \item \textbf{蒙特卡洛法（Monte Carlo Method）}
+        \begin{itemize}
+            \item \textbf{基本思想}：通过大统计量（$N\rightarrow\infty$）的统计实验方法或随机模拟方法来求解某些计算量或随机变量的概率模型
+        \end{itemize}
+        \item \textbf{采样}：
+            \begin{itemize}
+                \item \textbf{采样}
+                \begin{itemize}
+                    \item \textbf{目标}：使样本分布能够近似密度函数/概率分布
+                    \item \textbf{方法}：样本排除法
+                        \begin{enumerate}
+                            \item 从均匀分布中随机采样$x$
+                            \item 从$[0,1]$中随机采样$c$\footnote{每个$x$都有一个$c$，$c$决定了这个随机采样的$x$能否保留下来}
+                            \item 若$f(x)>c$，保留该样本$x$；否则舍弃
+                        \end{enumerate}
+                        \begin{figure}[H]
+                            \centering
+                            \includegraphics[width=0.4\linewidth]{images/sample.png}
+                            \caption{样本排除法}
+                        \end{figure}
+                \end{itemize}
+            \item \textbf{重采样}
+                \begin{itemize}
+                    \item \textbf{目标}：根据一个已知的可以采样的分布再一次采样，通过对粒子重要性评估，进行重采样获得目标样本分布\footnote{即从现在的分布（之前采样好的分布，称为建议分布）出发，为了实现一个目标的分布，重新进行一次采样，为此，需要评估建议分布的粒子对于目标分布的粒子而言的“重要性”——权重：如果某些粒子在之前某区域内分布较多，但是希望的目标分布这里分布是较少的，就赋予较低的权重；反过来，如果某些粒子之前在某区域分布较少，但是目标分布希望这里分布粒子较多，就赋予较高的权重}
+                    \item \textbf{评估方法}：根据每个样本目标分布$f$和建议分布$g$的比值来评估拟合$g$的样本的重要性：
+                        $$ w \left( x\right)  = \frac{\text{target}\;\text{distribution}}{\text{proposal}\;\text{distribution}} = \frac{f\left( x\right) }{g\left( x\right) } $$
+                        其中$ f\left( x\right)  > 0 \rightarrow  g\left( x\right)  > 0 $
+                        \begin{figure}[H]
+                            \centering
+                            \includegraphics[width=0.4\linewidth]{images/sample_evaluate.png}
+                            \caption{样本重要性评估，其中$f$称为目标分布，$g$称为建议分布}
+                        \end{figure}
+                        \item \textbf{重采样方法}\footnote{构造新的第 \(i\) 个粒子时，我们先从编号 \(1\) 到 \(M\) 的旧粒子中随机抽取一个索引 \(j(i)\)。抽到每个旧粒子 \(l\) 的概率就是该旧粒子的归一化权重 \(\tilde{\omega}_t^{[l]}\)。新粒子 \(\mathbf{x}^{[i]}\) 就是把被抽中的旧粒子 \(\bar{\mathbf{x}}^{[j(i)]}\) 复制过来（拷贝状态）。换言之，重采样只是从已有样本中按权重挑选若干副本来组成新的样本集。
+                        最后把重采样得到的每个新粒子权重重置为相同值：
+                        \[
+                        \omega^{[i]}=\frac{1}{M},
+                        \]
+                        因为重采样之后样本集合已经代表了目标分布的近似，下一时刻的权重从均等开始累积新信息。}：
+                        \begin{enumerate}
+                            \item \textbf{权重归一化}\footnote{上标$[m]$表示第m个粒子}
+                            \[
+                                \tilde{\omega}^{[m]}=\frac{\bar{\omega}^{[m]}}{\sum_{i=1}^{M}\bar{\omega}^{[i]}}
+                            \]
+                        
+                            \item \textbf{根据归一化后的权重在 $\bar{\chi}_t$ 中重新采样}
+                            \[
+                                \mathbf{x}^{[i]}=\bar{\mathbf{x}}^{[j(i)]}
+                            \]
+                            \[
+                                p\big(j(i)=l\big)=\tilde{\omega}_t^{[l]},\quad l=1,\ldots,M
+                            \]
+                        
+                            \item \textbf{对于重采样得到的粒子重新赋予权重}
+                            \[
+                                \omega^{[i]}=\frac{1}{M}
+                            \]
+                    \end{enumerate}
+                    \item \textbf{应用举例}
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.3\linewidth]{images/resample_example.png}
+                        \caption{重采样举例}
+                    \end{figure}
+                    {\small\kaishu{
+                    如上图所示，(1)(2)(3)为观测得到的三个路标。\\
+                    由于地图已知，根据它们在地图中的位置和测量得到的与机器人的距离，可以得到机器人所在位置的推测。对单独每一个路标，根据距离测定，机器人判断自己在该路标为圆心，距离为半径的圆上，同时由于误差，这个圆肯定不会是一条精确的线。\\
+                    根据三个独立的观测，我们分别能得到一个建议分布；而结合三个观测的条件下，得到的分布就是目标分布。
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/proposal.png}
+                        \caption{建议分布（上三）和目标分布（下右）}
+                    \end{figure}
+                    首先根据建议分布进行采样，得到下图中上方三个图的建议分布的粒子，汇总在一起即为总样本集合
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/proposal_sample.png}
+                        \caption{三个建议分布样本以及总样本集合，每个样本都由三个观测中的一个产生}
+                    \end{figure}
+                    接下来，我们需要评估总样本中粒子的重要性，即权重：\\
+                    目标分布 $$ p\left( {\mathbf{x} \mid  {\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right)  = \frac{\mathop{\prod }\limits_{k}p\left( {{\mathbf{z}}_{k} \mid  \mathbf{x}}\right) p\left( \mathbf{x}\right) }{p\left( {{\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right) } $$
+                    陆标 $ {z}_{l} $ 建议分布
+                    $$ p\left( {\mathbf{x} \mid  {\mathbf{z}}_{l}}\right)  = \frac{p\left( {{\mathbf{z}}_{l} \mid  \mathbf{x}}\right) p\left( \mathbf{x}\right) }{p\left( {\mathbf{z}}_{l}\right) } $$
+                    权重计算\footnote{可以观察下式的分子，我们知道$\mathbf{x}$指的就是粒子位置。那么，例如对建议分布$p(\mathbf{x} | \mathbf{z}_1)$，我们评估该建议分布下每一个粒子位置上能观察到$\mathbf{z}_2$，$\mathbf{z}_3$的可能性，如果可能性高，自然对重采样到目标分布的重要性高，即权重高，更趋近于目标分布即机器人实际位置}
+                    $$ \omega  = \frac{p\left( {\mathbf{x} \mid  {\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right) }{p\left( {\mathbf{x} \mid  {\mathbf{z}}_{l}}\right) } = \frac{p\left( {\mathbf{z}}_{l}\right) \mathop{\prod }\limits_{{k \neq  l}}p\left( {{\mathbf{z}}_{k} \mid  \mathbf{x}}\right) }{p\left( {{\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right) } $$
+                    之后按照权重重新采样即可。
+                    \begin{figure}[H]
+                        \centering
+                        \includegraphics[width=0.5\linewidth]{images/after_resample.png}
+                        \caption{总样本集合进行重采样}
+                    \end{figure}
+                    }}
+                \end{itemize}
+            \end{itemize}
+        \item \textbf{粒子滤波（Particle Filter）}
+        \begin{itemize}
+            \item \textbf{基本思想}：通过一组样本（粒子）来近似表示概率分布。
+            \item \textbf{优点}：对于任意概率分布都可以通过样本分布来描述。
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/pf1.png}
+                \caption{某区域内粒子分布越密集，真实状态落在该区域的可能性越大}
+            \end{figure}
+            \item \textbf{变量定义}
+                \begin{itemize}
+                \item 记t时刻的粒子集合为
+                \[
+                    \mathcal{X}_t = \{x_t^{[1]}, x_t^{[2]}, \ldots, x_t^{[M]}\}
+                \]
+                上标为粒子索引, M为粒子总数
+                \vspace{2mm}
+                \item 每一个粒子 \(x_t^{[i]}\) 是t时刻状态的一个假设
+                \[
+                    x_t^{[i]} \sim p(x_t \mid Z^t, U^{t-1}, m)
+                \]
+                \vspace{2mm}
+                \item 某一粒子从0时刻到当前时刻的序列
+                \[
+                    x_{0:t}^{[i]} = x_0^{[i]}, x_1^{[i]}, \ldots, x_t^{[i]}
+                \]
+                表示了对某一路径的假设
+                \vspace{4mm}
+                
+                \item \textbf{粒子滤波实际上是计算所有状态序列的后验概率}
+            \end{itemize}
+            \item \textbf{算法（MCL）}：
+                \begin{enumerate}
+                    \item 以表示上一时刻概率分布的粒子集合为起点 \( {\mathcal{X}}_{t - 1} \)
+                    \item 利用运动模型对粒子进行更新\textbf{并采样}\footnote{因为机器人运动之后是有误差的——不是简单的平移，而是每个粒子在平移之后还有一个误差，所以要采样一次}
+                    \item 利用观测模型来计算粒子的权重
+                    \item 根据权重重新采样,生成表示当前时刻信度的粒子集合 \( {\mathcal{X}}_{t} \)
+                \end{enumerate}
+                \begin{algorithm}[ht]
+                \caption{Particle filter}
+                \label{alg:particle_filter}
+                \begin{algorithmic}[1]
+                \State \textbf{Input:} $X_{t-1},\; u_{t-1},\; z_t$
+                \State $\bar{X}_t \gets X_t \gets \varnothing$
+                \For{$i=1$ to $M$}
+                  \State Sample $\bar{x}_t^{[i]} \sim \tilde{p}(x_t \mid Z^{t-1}, U^{t-1}, m)$
+                  \State $\omega_t^{[i]} \gets p(z_t \mid \bar{x}_t^{[i]}, m)$
+                  \State $\bar{X}_t \gets \bar{X}_t \cup \langle \bar{x}_t^{[i]}, \omega_t^{[i]} \rangle$
+                \EndFor
+                \For{$i=1$ to $M$}\footnotemark
+                  \State draw index $I$ with probability $\propto \omega_t^{[i]}$
+                  \State $x_t^{[i]} \gets \bar{x}_t^{[I]}$, add $x_t^{[i]}$ to $X_t$
+                \EndFor
+                \State \Return $X_t$
+                \end{algorithmic}
+                \end{algorithm}
+                \footnotetext{这个for循环的过程就是重采样！}
+            \item \textbf{推导过程}\\
+            {\small\kaishu{
+            我们的目标是，已知t-1时刻的粒子分布，利用运动模型采样，得到传递后的粒子分布；再利用观测模型对粒子的重要性评价，进行重采样，最终得到t时刻的粒子分布。回顾马尔可夫自定位公式：
+            $$
+            \overbrace{p(x_t\mid Z^t, U^{t-1}, m)}^{\text{\small t时刻粒子集}}
+            =
+            \eta\,
+            \underbrace{p(z_t\mid x_t, m)}_{\text{\small 粒子评价}}
+            \int
+            \underbrace{p(x_t\mid x_{t-1}, u_{t-1}, m)}_{\text{\small 粒子传递}}
+            \underbrace{p(x_{t-1}\mid Z^{t-1}, U^{t-2}, m)}_{\text{\small t-1时刻粒子集}}
+            \,dx_{t-1}
+            $$
+            \begin{enumerate}
+                \item 用运动模型对粒子进行更新及采样
+                \\我们以里程计运动模型为例：
+                \begin{enumerate}
+                    \item 给定 t-1 时刻粒子集
+                    \[
+                        x_{t-1} = \{x_{t-1}^{[1]}, x_{t-1}^{[2]}, \ldots, x_{t-1}^{[M]}\}
+                    \]
+                    \item 基于运动模型对每个粒子进行传递，得到建议分布的样本
+                    \[
+                        \bar{\mathbf{x}}_t^{[i]} = \mathbf{x}_{t-1}^{[i]} + 
+                        \begin{pmatrix}
+                            \delta_{trans}\cos(\theta + \delta_{rot1})\\[4pt]
+                            \delta_{trans}\sin(\theta + \delta_{rot1})\\[4pt]
+                            \theta + \delta_{rot1} + \delta_{rot2}
+                        \end{pmatrix}
+                        + v_t,\quad v_t \sim N(0,R_t)
+                    \]
+                    \[
+                        \bar{\mathcal{X}}_t = \{\bar{x}_t^{[1]}, \bar{x}_t^{[2]}, \ldots, \bar{x}_t^{[M]}\}
+                        \sim \tilde{p}(x_t \mid Z^{t-1}, U^{t-1}, m)
+                    \]
+                \end{enumerate}
+            
+                \item 采用观测模型计算粒子权重（粒子评价）
+                \begin{enumerate}
+                    \item 对每个建议样本计算权重
+                    \[
+                        \omega_t^{[i]} = p(z_t \mid \bar{x}_t^{[i]}, m)
+                    \]
+                    \item 观测概率展开
+                    \[
+                        p(z_t \mid \bar{x}_t^{[i]}, m)
+                        = p(f_t^1, f_t^2, \ldots, f_t^K \mid \bar{x}_t^{[i]}, m)
+                        = \prod_{k=1}^K p(f_t^k \mid \bar{x}_t^{[i]}, m)
+                    \]
+                    \[
+                        p(f_t^k \mid \bar{x}_t^{[i]}, m) = N(f_t^i; \hat{f}_t^i, \sigma_f^2)
+                    \]
+                \end{enumerate}
+            
+                \item 根据权重进行重采样（粒子传递 -> t时刻粒子集）
+                \begin{enumerate}
+                    \item 重采样策略
+                    \item 重采样后得到的粒子集合
+                    \[
+                        \mathcal{X}_t = \{x_t^{[1]}, x_t^{[2]}, \ldots, x_t^{[M]}\}
+                    \]
+                \end{enumerate}
+            \end{enumerate}
+            }}
+            \begin{figure}[H]
+              \centering
+              \setlength{\tabcolsep}{4pt} % 图片之间的水平间距，按需调整
+              \begin{tabular}{cccc}
+                \includegraphics[width=0.24\textwidth]{images/pf/1.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/2.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/3.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/4.png} \\[4pt]
+                \includegraphics[width=0.24\textwidth]{images/pf/5.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/6.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/7.png} &
+                \includegraphics[width=0.24\textwidth]{images/pf/8.png} \\
+              \end{tabular}
+              \caption{粒子滤波实例，该方法适用于全局定位}
+              \label{fig:particle_filter_examples}
+            \end{figure}
+            \item \textbf{PF算法中的误差}\footnote{回顾：EKF的误差来自于两个方面：非高斯分布近似为高斯分布，非线性函数近似为线性函数}：
+                \begin{enumerate}
+                    \item \textbf{由样本集合近似带来的系统偏差}
+                        \begin{itemize}
+                            \item 问题的根源是\textbf{重采样时的归一化}
+                            \begin{itemize}
+                                \item 约束增加：从M维空间计算得到的 \( {\omega }_{t}^{\left\lbrack  m\right\rbrack  } \) 在归一化后,增加了一个约束
+                                $$ {\widetilde{\mathbf{\omega }}}_{t}^{\left\lbrack  m\right\rbrack  } = {\mathbf{\omega }}_{t}^{\left\lbrack  m\right\rbrack  } $$
+                                即 \( \mathop{\sum }\limits_{m}{\widetilde{\omega }}_{t}^{\left\lbrack  m\right\rbrack  } = 1 \) ,使得样本权重的维度变为 \( \mathbf{M} - 1 \) 维
+                               \item 极端情况 \( \mathrm{M} = 1 \) ,观测模型将失去作用\footnote{显然，M应该足够地大，才能减少样本集合近似带来的系统偏差}
+                            \end{itemize}
+                        \end{itemize}
+                    \item \textbf{由随机采样带来的偏差}
+                        \begin{itemize}
+                            \item 随机采样实际上是对原来概率分布的离散化，如下图所示，由粒子还原得到的概率分布与真实概率分布有差异，且粒子越少误差越大
+                            \begin{figure}[H]
+                                \centering
+                                \includegraphics[width=0.5\linewidth]{images/sample_error.png}
+                                \caption{随机采样带来误差}
+                            \end{figure}
+                        \end{itemize}
+                    \item \textbf{由重采样带来的偏差}
+                        \begin{itemize}
+                            \item \textbf{粒子分布失去多样性}：不断重采样可能会使所有粒子聚集在同一状态估计上。具体而言，粒子分布的准确性不断增加（本身方差在减小），但可能正确性减小（与真值的方差在增大）
+                            \item \textbf{无法生成相同的样本分布}：$\mathbf{x}_t=\mathbf{x}_{t-1}$，机器人没有运动且没有观测，理论上，$\mathbf{x}_t$的概率分布$\mathbf{x}_{t-1}$的概率分布应该相同，但重采样步骤无法生成相同的样本分布
+                        \end{itemize}
+                \end{enumerate}
+                \item 粒子失去多样性问题的解决办法：\textbf{减少重采样次数}
+                \begin{itemize}
+                    \item 根据\textbf{权重方差}决定是否重采样
+                    $$ {\widehat{N}}_{\text{ eff }} = \frac{1}{\mathop{\sum }\limits_{{i = 1}}^{M}{\left( {\omega }_{t}^{\left\lbrack  i\right\rbrack  }\right) }^{2}}\;\left\{  \begin{array}{lll} \text{ resample } & {\widehat{N}}_{\text{ eff }} > {\bar{N}}_{\text{ thre }} & \\  \text{ not resample } & \text{ otherwise } \end{array}\right. $$
+                    \item 无论是否重采样，保持权重估计\footnote{权重估计仍然在做，但是做完之后不一定重采样了，如果不重采样的话，权重与上次的权重不断叠加直到下一次重采样后再全都均匀分布}
+                    $$ {\omega }_{t}^{\left\lbrack  m\right\rbrack  } = \left\{  \begin{array}{ll} 1/M & \text{ if }{resampling}\;{took}\;{place} \\  p\left( {{\mathbf{z}}_{t}^{ \intercal  }|{\mathbf{x}}_{t}^{\left\lbrack  m\right\rbrack  }}\right) {\omega }_{t - 1}^{\left\lbrack  m\right\rbrack  } & {if}\;{no}\;{resampling}\;{took}\;{place} \end{array}\right. $$
+                \end{itemize}
+                \begin{itemize}
+                    \item \textcolor{red}{重采样次数过多，会导致粒子失去多样性；重采样次数过少，会让大量粒子分布在概率低的区域，收敛慢。}
+                    \item \textcolor{red}{粒子数过多则计算浪费；粒子数过少则不能覆盖可能状态区域；一般在全局定位时需要较多粒子，收敛后转为位置跟踪，只需少量粒子。}
+                \end{itemize}
+        \end{itemize}
+            \textbf{小结}：
+            \begin{table}[htbp]
+              \centering
+              \caption{EKF与PF的对比}
+              \label{tab:ekf_pf}
+              \begin{tabular}{@{} l l p{9cm} @{}}
+                \toprule
+                方法 & 是否适用于全局定位 & 误差来源 \\
+                \midrule
+                EKF & 不适用 &
+                  (1) 非高斯分布近似为高斯分布\\
+                  & & (2) 非线性函数近似为线性函数 \\
+                \addlinespace
+                PF  & 适用 &
+                  (1) 由样本集合近似带来的系统偏差\\
+                  & & (2) 由随机采样带来的偏差\\
+                  & & (3) 由重采样带来的偏差 \\
+                \bottomrule
+              \end{tabular}
+            \end{table}
+            \item \textbf{绑架问题}
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/kidnap.png}
+                \caption{绑架问题示例}
+            \end{figure}
+            \textbf{绑架检测}：检测\textbf{一段时间内}的\textbf{观测模型}概率分布，如果概率都很低，说明粒子都偏离了真值
+            $$ p\left( {{\mathbf{Z}}_{t} \mid  {\mathbf{Z}}^{t - 1},{\mathbf{u}}_{{t1} : t - 1},\mathbf{m}}\right)  \approx  \textcolor{red}{\mathop{\sum }\limits_{{{t}^{\prime } = {t_1}}}}\frac{1}{M}\mathop{\sum }\limits_{{m = 1}}^{M}{\omega }_{{t}^{\prime }}^{\left\lbrack  m\right\rbrack  } $$
+            \textbf{解决办法}：调整粒子分布\footnote{两种办法，一种是识别到被绑架后从头再来，把点均匀随机撒到全图上重新慢慢收敛到新位置上；另一种是头铁，硬顶着问题根据观测让粒子逐渐收敛到新位置上}：
+                \begin{itemize}
+                    \item (1)在位姿空间均匀分布，利用当前观测评估权重
+                    \item (2)根据观测可能性分布
+                \end{itemize}
+
+            \item \textbf{粒子滤波定位方法存在的问题}：
+            \begin{itemize}
+                \item 难以推广到大范围环境6DOF\footnote{例如无人机六个维度，每多一个维度都需要粒子集指数级增长}位姿估计：粒子集必须足够大，才能覆盖t-1时刻后验的分布
+                \item 为解决绑架问题，始终需要保持一部分粒子全局分布，避免完全收敛到局部，但导致全局也很难快速收敛到新位置
+            \end{itemize}
+            \textbf{例题}：\\
+                {\small\kaishu{
+                现有一机器人在如下左图所示场景中需要实现自主定位,初始位置未知,拟采用粒子滤波定位方法,场景
+                四周有8个圆柱,机器人安装有180度激光传感器,可根据激光数据聚类实现圆柱识别,并可估计圆柱与机
+                器人之间的距离,距离估计方差为 \( {\delta }^{2} \)
+                \begin{enumerate}
+                    \item 机器人在初始位置处观测信息如下右图所示,距离值分别为 \( {d}_{0}^{1} \) , \( {d}_{0}^{2} \) , \( {d}_{0}^{3} \) , 由于机器人上还装有视觉传感器
+                根据圆柱颜色识别,这三个观测分别对应圆柱2、3、4,请说明此时粒子生成方法并画出粒子分布示意
+                图,给出对这些粒子的重要性评估计算公式和计算方法,并画出根据重要性重采样后的粒子分布示意图。
+                    \item 机器人在初始位置处观测信息如下右图所示,距离值分别为 \( {d}_{0}^{1} \) , \( {d}_{0}^{2} \) , \( {d}_{0}^{3} \) ,但机器人上没有安装其他传感器
+                请说明此时粒子生成方法并画出粒子分布示意图,给出对这些粒子的重要性评估计算公式和计算方法,
+                并画出根据重要性重采样后的粒子分布示意图。
+                \end{enumerate}
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.6\linewidth]{images/liti.png}
+                    \caption{粒子滤波例题}
+                \end{figure}
+                }}
+\end{enumerate}
+\subsection{目前常用定位系统}
+    新方法例如3D-ICP，ORB-SLAM-loc，ROVIO-loc总体仍然是贝叶斯滤波+马尔科夫架构。
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\linewidth]{images/changyongjiagou.png}
+        \caption{目前常用定位系统架构}
+    \end{figure}
+    目前的定位存在问题：
+    \begin{itemize}
+        \item 环境存在相似性和动态性：动态变化导致可匹配特征量少、描述鲁棒性差，大范围环境匹配工作量大
+    \end{itemize}
 \end{document}

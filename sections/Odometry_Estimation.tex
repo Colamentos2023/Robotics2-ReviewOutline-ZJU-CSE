@@ -517,7 +517,7 @@
         \item \textbf{基本思路}：通过\textbf{两帧或多帧图像中的特征点匹配关系}，估计相机在不同时间的\textbf{位姿变化（R, t）}\footnote{这一部分是整个视觉里程计与SLAM系统中“从特征匹配过渡到几何估计”的核心环节，是视觉运动估计的基础。}
 
         \item \textbf{根据相机类型的分类方法}：
-\begin{enumerate} \item \textbf{单目相机（Monocular Camera）} \begin{itemize} \item 仅有\textbf{2D像素坐标}； \item 根据两组2D点的对应关系估计相机运动，属于\textbf{2D-to-2D}问题； \item 方法：\textbf{对极几何（Epipolar Geometry）}方法。 \end{itemize} \item \textbf{双目 / RGB-D 相机（Stereo or RGB-D Camera）} \begin{itemize} \item 每个像素都具有\textbf{距离信息}； \item 根据两组3D点估计相机运动，属于\textbf{3D-to-3D}问题； \item 方法：\textbf{ICP}方法。 \end{itemize} \item \textbf{具有三维点及其投影位置的相机（PnP Problem）} \begin{itemize} \item \textbf{3D-to-2D}关系； \item 方法：PnP方法。 \end{itemize} \end{enumerate}
+    \begin{enumerate} \item \textbf{单目相机（Monocular Camera）} \begin{itemize} \item 仅有\textbf{2D像素坐标}； \item 根据两组2D点的对应关系估计相机运动，属于\textbf{2D-to-2D}问题； \item 方法：\textbf{对极几何（Epipolar Geometry）}方法。 \end{itemize} \item \textbf{双目 / RGB-D 相机（Stereo or RGB-D Camera）} \begin{itemize} \item 每个像素都具有\textbf{距离信息}； \item 根据两组3D点估计相机运动，属于\textbf{3D-to-3D}问题； \item 方法：\textbf{ICP}方法。 \end{itemize} \item \textbf{具有三维点及其投影位置的相机（PnP Problem）} \begin{itemize} \item \textbf{3D-to-2D}关系； \item 方法：PnP方法。 \end{itemize} \end{enumerate}
 
 
         \item \textbf{2D-to-2D：对极几何}

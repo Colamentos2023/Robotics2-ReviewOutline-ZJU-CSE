@@ -1,4 +1,156 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 \section{同时定位与地图构建（SLAM）}
+\subsection{SLAM的概念与关键问题}
+\begin{enumerate}
+    \item \textbf{问题来源}：多帧局部地图拼合依赖于定位准确性，定位依赖于地图和感知的正确匹配。
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{images/chickenandegg.png}
+    \caption{先有鸡还是先有蛋？}
+\end{figure}
+    \item \textbf{SLAM}：同时估计机器人位姿和环境地图的期望/概率分布，即联合概率分布：\\
+    记地图为 \( \mathrm{m} \) ,\\
+    \( t \) 时刻机器人位姿为 \( {\mathbf{x}}_{t} = {\left( {x}_{t},{y}_{t},{\theta }_{t}\right) }^{T} \) ,观测信息为 \( {z}_{t} \) ,控制信息为 \( {\mathbf{u}}_{t} \)\\
+    \( \begin{array}{l} {\mathbf{X}}^{t} = \{ {\mathbf{x}}_{0},{\mathbf{x}}_{1},...,{\mathbf{x}}_{t}\} \;{\mathbf{Z}}^{t} = \{ {\mathbf{z}}_{0},{\mathbf{z}}_{1},...,{\mathbf{z}}_{t}\} \;{\mathbf{U}}^{t - 1} = \{ {\mathbf{u}}_{0},{\mathbf{u}}_{1},...,{\mathbf{u}}_{t - 1}\}  \end{array} \)
+    \\求 \( E\left\lbrack  {{\mathbf{X}}^{t},\mathbf{m} \mid  {\mathbf{Z}}^{t},{\mathbf{U}}^{t - 1}}\right\rbrack \) 或 \( E\left\lbrack  {{\mathbf{x}}_{t},\mathbf{m} \mid  {\mathbf{Z}}^{t},{\mathbf{U}}^{t - 1}}\right\rbrack \)
+    \item \textbf{挑战来源}：以基于特征的环境地图构建为例——
+        \begin{itemize}
+            \item 待估计的$\mathbf{x}_t,\mathbf{m}$是全局坐标系下；观测$\mathbf{z}_i$是在机器人坐标系下；\\需要根据定位将新观测从机器人坐标转换到全局坐标系下；
+            \\但定位误差导致地图构建误差，地图误差影响后续定位准确性\footnote{即新的观测依赖于$\mathbf{x}_t$，$\mathbf{x}_{t+1}$又依赖于本次观测}
+        \end{itemize}
+    \item \textbf{收敛求解依据}：特征的相互关联\\
+    尽管观测存在误差，但同一次观测中的\textbf{任意两个特征}之间的相对关系可以高度精确；\\
+    随着机器人运动特征被多次观测，观测次数的增加可使\textbf{特征之间的相对关系}更精确；\\
+    特征与特征之间相互关联，随着观测增加，地图准确性增加，机器人定位约束也增强；\\
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\linewidth]{images/feature2feature.png}
+        \caption{建立特征之间的联系}
+    \end{figure}
+    \item \textbf{收敛求解关键}：数据关联\footnote{错误的数据关联将导致地图构建失败}
+        \begin{itemize}
+            \item 里程估计:前后帧数据关联
+            \item 位姿跟踪:局部数据关联
+            \item 位置识别:全局数据关联
+        \end{itemize}
+        SLAM中一种特殊的数据关联是闭环检测。
+    \item \textbf{闭环检测}：
+        \begin{itemize}
+            \item \textbf{目的}：有效降低估计的不确定性
+            \item \textbf{含义}：机器人在SLAM过程中回到以前到过的地方
+            \item \textbf{性质}：一种进行位置识别的全局数据关联
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.4\linewidth]{images/bihuan.png}
+                    \caption{灰色：位姿估计不确定性；红色：地图构建不确定性；闭环检测可以降低后者}
+                \end{figure}
+            \textcolor{red}{不管闭环是否正确，都能降低状态估计的不确定性；但可能导致地图构建的失败}     
+        \end{itemize}
+\end{enumerate}
+\subsection{SLAM算法}\footnote{本部分多数内容仅供了解}
+\begin{enumerate}
+    \item \textbf{EKF SLAM}\footnote{第一个SLAM算法}
+        \begin{itemize}
+            \item 面向特征地图，特别是陆标特征地图；
+            \item 待估计状态维度由定位的3个维度\footnote{平面机器人位姿}扩展到了3+2n个维度\footnote{每个特征的坐标$(x,y)$，有n个特征}\\
+            \( {\mathbf{\mu }}_{t} = {\left( \begin{matrix} {\mathbf{x}}_{{}_{R}} \\  {\mathbf{m}}_{{}_{1}} \\  {\mathbf{m}}_{{}_{2}} \\  \vdots \\  {\mathbf{m}}_{{}_{n}} \end{matrix}\right) }_{t}\;{\overset{ }{\sum }}_{t} = {\left( \begin{matrix} \mathop{\sum }\limits_{{\mathbf{x}}_{{}_{R}}} & \mathop{\sum }\limits_{{}_{{\mathbf{x}}_{{}_{R}}{\mathbf{m}}_{{}_{1}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{x}}_{{}_{R}}{\mathbf{m}}_{{}_{2}}}} & \cdots & \mathop{\sum }\limits_{{}_{{\mathbf{x}}_{{}_{R}}{\mathbf{m}}_{{}_{n}}}} \\  \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{1}{\mathbf{x}}_{{}_{R}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{1}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{1}{\mathbf{m}}_{{}_{2}}}} & \cdots & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{1}{\mathbf{m}}_{{}_{n}}}} \\  \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{2}{\mathbf{x}}_{{}_{R}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{2}{\mathbf{m}}_{{}_{1}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{2}}} & \cdots & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{n}{\mathbf{m}}_{{}_{n}}}} \\  \vdots & \vdots & \vdots &  \ddots  & \vdots \\  \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{n}{\mathbf{x}}_{{}_{R}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{n}{\mathbf{m}}_{{}_{1}}}} & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{n}{\mathbf{m}}_{{}_{2}}}} & \cdots & \mathop{\sum }\limits_{{}_{{\mathbf{m}}_{n}}} \end{matrix}\right) }_{t} \)
+            \item 采用最大似然法进行数据关联\footnote{EKF是高斯分布（单峰假设），对数据关联要求非常高，由此引入了FAST SLAM}
+        \end{itemize}
+
+        \item \textbf{FAST SLAM}
+        \begin{itemize}
+            \item \textbf{基本思想}：
+                \begin{itemize}
+                    \item 采用粒子分布表示机器人路径的后验概率
+                    \item 粒子内采用高斯分布表示陆标特征的后验概率，在粒子内对每个陆标特征应用一个EKF进行估计
+                \end{itemize}
+            \item 待估计状态维度由定位的3个维度\footnote{平面机器人位姿}扩展到了3+2n个维度\footnote{每个特征的坐标$(x,y)$，有n个特征}
+            \item 不能用粒子表示所有待估计量的概率分布\footnote{表示状态空间分布所需粒子数随状态空间维度指数级增长}
+            \item \textbf{公式}\footnote{Rao-Blackwellization PF：对联合概率分布，某些变量用粒子分布表示，某些变量仍用高斯分布表示；即粒子估计机器人的位姿，同时在每个粒子存储一张地图}:
+            \[
+            \begin{aligned}
+            p\big(\mathbf{X}^t,\mathbf{m}\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big)
+            &= p\big(\mathbf{X}^t\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big)\;p\big(\mathbf{m}\mid\mathbf{X}^t,\mathbf{Z}^t\big)\\[6pt]
+            &= \underbrace{p\big(\mathbf{X}^t\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big)}_{\text{机器人路径估计定位问题}}
+            \;\underbrace{\displaystyle\prod_{i}p\big(\mathbf{m}_i\mid\mathbf{X}^t,\mathbf{Z}^t\big)}_{\text{路径已知情况下条件独立的陆标位置估计}}
+            \end{aligned}
+            \]
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.7\linewidth]{images/fastslam.png}
+                \caption{FASTSLAM}
+            \end{figure}
+            \item \textbf{权重计算}\footnote{目标分布是在所有观测（到t）和控制信息（到t-1）的情况下估计，建议分布是在观测（到t-1）和控制信息（到t-1）的情况下估计——和定位一样，经过$u_{t-1}$粒子传递后还没观测，此时是建议分布}：
+            \begin{align}
+            \omega_t^{[k]}
+            &= \dfrac{\text{target distribution}}{\text{proposal distribution}} \\[6pt]
+            &= \dfrac{p\big(\mathbf{x}_t^{[k]}\mid \mathbf{Z}^t,\mathbf{U}^{t-1}\big)}
+                     {p\big(\mathbf{x}_t^{[k]}\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1}\big)} \\[6pt]
+            &= \eta\,\dfrac{p\big(\mathbf{z}_t\mid \mathbf{x}_t^{[k]},\mathbf{Z}^{t-1},\mathbf{U}^{t-1}\big)\,
+                        p\big(\mathbf{x}_t^{[k]}\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1}\big)}
+                       {p\big(\mathbf{x}_t^{[k]}\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1}\big)} \\[6pt]
+            &= \eta\, p\big(\mathbf{z}_t\mid \mathbf{x}_t^{[k]},\mathbf{Z}^{t-1}\big) \\[6pt]
+            &= \eta \int p\big(\mathbf{z}_t\mid \mathbf{m}_i,\mathbf{x}_t^{[k]},\mathbf{Z}^{t-1}\big)\,
+                        p\big(\mathbf{m}_i\mid \mathbf{x}_t^{[k]},\mathbf{Z}^{t-1}\big)\,\mathrm{d}\mathbf{m}_i \\[6pt]
+            &= \eta \int p\big(\mathbf{z}_t\mid \mathbf{m}_i,\mathbf{x}_t^{[k]}\big)\,
+                        p\big(\mathbf{m}_i\mid \mathbf{x}_t^{[k]},\mathbf{Z}^{t-1}\big)\,\mathrm{d}\mathbf{m}_i
+            \end{align}
+            \item \textbf{优点}：
+            \begin{itemize}
+                \item 即可用于特征地图，也可用于栅格地图
+                \item 结合观测优化建议有助于精确粒子估计，减少所需要的粒子数
+            \end{itemize}
+            \item \textbf{问题}：每个粒子维持一张栅格地图，过于耗费存储资源，需要尽量减少粒子数但又要避免粒子枯竭\footnote{尽管我们已经在上面的推导中分解先估计机器人位姿，在位姿条件下再去估计地图，减少了粒子数的需求，但仍然很耗资源}
+        \end{itemize}
+        \item \textbf{图优化SLAM}
+        \begin{itemize}
+            \item \textbf{基本思想}：求解满足约束的最优估计——寻找一个最优节点配置，使得约束一致性最大，即由约束产生的误差最小
+            \item \textbf{建图原则}：
+            \begin{itemize}
+                \item POSE FEATURE GRAPH\footnote{约束采用信息墒表示，即联合概率分布的-log值表示，使得问题是一个非线性最小二乘问题(nonlinear least squares problem)}
+                \begin{enumerate}
+                    \item 图中节点可以是待估计位姿或者特征
+                    \item 位姿与位姿节点之间的边表示运动约束
+                    \item 位姿与特征节点之间的边表示观测约束
+                \end{enumerate}
+                \item POSE GRAPH\footnote{利用pose graph最优化得到的是路径的后验概率地图——根据路径可得生成地图和地图的边缘概率分布，但不能得到整个地图的后验概率分布}
+                \begin{enumerate}
+                    \item 图中节点仅表示待估计位姿
+                    \item 节点之间的边表示位姿之间的约束，由观测约束(或运动约束)得到
+                \end{enumerate}
+            \end{itemize}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\linewidth]{images/graph_slam.png}
+                    \caption{POSE FEATURE GRAPH}
+            \end{figure}
+        \end{itemize}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\linewidth]{images/tuyouhua.png}
+            \caption{图优化SLAM的架构}
+        \end{figure}
+        {\small\kaishu{如果在线执行，则随着新数据的输入，迭代执行front-end和back-end\\上一次构建得到的一致性地图有助于减少搜索空间来帮助确定新的约束\\如果离线执行，则构建一次图，对图做最优化}}
+            \item \textbf{两个任务}：（1）前端：建图（2）后端：使约束误差最小化
+    
+\end{enumerate}
+\textbf{小结}\footnote{EKF状态向量只包含当前机器人位姿 $\mathbf{x}_t$ 与地图 $\mathbf{m}$}
+\begin{table}[ht]
+  \centering
+  \caption{EKF SLAM、FAST SLAM、图优化 SLAM 是否面向全路径 SLAM 的比较}
+  \label{tab:slams}
+  \begin{tabular}{@{} l c l @{}}
+    \toprule
+    方法 & 面向全路径 SLAM? & 估计的后验 \\
+    \midrule
+    EKF SLAM & 否 & $\displaystyle E\big[\mathbf{x}^t,\mathbf{m}\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big]$ \\
+    FAST SLAM & 是 & $\displaystyle E\big[\mathbf{X}^t,\mathbf{m}\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big]$ \\
+    图优化 SLAM & 是 & $\displaystyle E\big[\mathbf{X}^t,\mathbf{m}\mid\mathbf{Z}^t,\mathbf{U}^{t-1}\big]$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
 \end{document}
