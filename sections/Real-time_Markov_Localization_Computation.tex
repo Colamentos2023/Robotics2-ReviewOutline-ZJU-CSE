@@ -1,7 +1,7 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 \section{马尔可夫实时自定位计算}
-\[ p(\mathbf{x}_{t}|\mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})=\eta p(\mathbf{z}_{t}|\mathbf{x}_{t},\mathbf{m})\int p(\mathbf{x}_{t}|\mathbf{x}_{t-1},\mathbf{u}_{t-1},\mathbf{m})p(\mathbf{x}_{t-1}|\mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})d\mathbf{x}_{t-1} ) \]
+\[ p(\mathbf{x}_{t}|\mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})=\eta p(\mathbf{z}_{t}|\mathbf{x}_{t},\mathbf{m})\int p(\mathbf{x}_{t}|\mathbf{x}_{t-1},\mathbf{u}_{t-1},\mathbf{m})p(\mathbf{x}_{t-1}|\mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})d\mathbf{x}_{t-1} \]
 \subsection{求解步骤}
 \begin{itemize}
     \item 位姿预估 prediction（这里我们将这一项记作$\bar{p}$）
@@ -402,7 +402,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
     在时刻 $t$ 观测得到的特征为 $ \mathbf{z}_t = \{ z_t^1,z_t^2,\ldots\}$。每一个特征有一个 $c_t^i$ 说明 $z_t^i$ 在地图中对应特征，$c_t^i\in\{1,\ldots,N,N+1\}$。设 $c_t^i=j$，单个特征观测模型为
     $$
     z_t^i =
-    \hat{z}_t^i = h(\mathbf{x}_t, c_t^i, \mathbf{m})
+    \hat{z}_t^i  + \omega= h(\mathbf{x}_t, c_t^i, \mathbf{m})
     + \omega,\qquad
     $$
     即

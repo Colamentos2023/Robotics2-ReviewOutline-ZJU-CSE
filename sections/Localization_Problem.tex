@@ -256,7 +256,7 @@
 $$
 p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m})
 = \frac{
-  p(\mathbf{z}_t \mid  \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
+  p(\mathbf{z}_t \mid  \mathbf{X}^{t}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
   \;
   p(\mathbf{x}_t \mid \mathbf{X}^{t-1}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1}, \mathbf{m})
 }{
@@ -378,7 +378,7 @@ $$
                 \caption{考虑地图的运动模型}
             \end{figure}
             {\small\kaishu 
-            $$ \mathbf{p}\left( {{\mathrm{x}}_{t} \mid  {\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1},\mathbf{m}}\right)  = \mathbf{m}\left( {\mathbf{m} \mid  {\mathrm{x}}_{t},{\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right) \mathbf{p}\left( {{\mathrm{x}}_{t} \mid  {\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right)$$
+            $$ p\left( {{\mathrm{x}}_{t} \mid  {\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1},\mathbf{m}}\right)  = p\left( {\mathbf{m} \mid  {\mathrm{x}}_{t},{\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right) p\left( {{\mathrm{x}}_{t} \mid  {\mathrm{x}}_{t - 1},{\mathbf{u}}_{t - 1}}\right)$$
             地图分为可通行和不可通行\\
             本项作用: 基于地图降低运动模型的不确定性\\
             问题：需要融合两次位姿之间路径不被占用的可能性和机器人根据控制跟随该路径的可能性,计算非常复杂,难以计算闭式解\\
@@ -393,7 +393,7 @@ $$
             $$\begin{cases}x_t=x_{t-1}+\Delta d\cos(\theta_{t-1}+\Delta\theta)\\y_t=y_{t-1}+\Delta d\sin(\theta_{t-1}+\Delta\theta)\\\theta_t=\theta_{t-1}+\Delta\theta\end{cases}$$
             \item \textbf{速度运动模型}：$u_{t-1}$是\textbf{控制机器人运动的指令}，回顾其航位推算计算公式：
             $$\left.\left(\begin{array}{c}x'\\y'\\\theta'\end{array}\right.\right)=\left(\begin{array}{c}x-\frac{\nu}{\omega}\sin(\theta)+\frac{\nu}{\omega}\sin(\theta+\omega\Delta t)\\y+\frac{\nu}{\omega}\cos(\theta)-\frac{\nu}{\omega}\cos(\theta+\omega\Delta t)\\\theta+\omega\Delta t\end{array}\right)$$
-        \end{itemize}
+        \end{itemize}\footnote{这里$x'$就是$x_{t}$,$x$就是$x_{t-1}$，对于$y、\theta$同理}
 
 \begin{enumerate}
     \item \textbf{里程计运动模型}\\
@@ -447,9 +447,9 @@ $$
                 \includegraphics[width=0.3\textwidth]{images/guass.png}
                 \caption{设定为高斯分布的误差}
             \end{figure}
-            $$ p( \widehat{\delta }_{rot1})  = N\left( {{\widetilde{\delta }}_{{rot}1};0,{\alpha }_{1}\left| {\delta }_{{rot}1}\right|  + {\alpha }_{2}\left| {\delta }_{trans}\right| }\right) $$
+            $$ p( \widetilde{\delta }_{rot1})  = N\left( {{\widetilde{\delta }}_{{rot}1};0,{\alpha }_{1}\left| {\delta }_{{rot}1}\right|  + {\alpha }_{2}\left| {\delta }_{trans}\right| }\right) $$
             $$ p\left( {\widetilde{\mathbf{\delta }}}_{\text{trans }}\right)  = N\left( {{\widetilde{\mathbf{\delta }}}_{\text{trans }};0,{\alpha }_{3}\left| {\mathbf{\delta }}_{\text{trans }}\right|  + {\alpha }_{4}\left| {{\mathbf{\delta }}_{\text{rot1 }} + {\mathbf{\delta }}_{\text{rot2 }}}\right| }\right) $$
-            $$ p\left( {\widetilde{\delta }}_{rot2}\right)  = N\left( {{\widetilde{\delta }}_{rot2};0,{\alpha }_{1}\left| {\delta }_{rot2}\right|  + {\alpha }_{2}\left| {\delta }_{trans}\right| }\right) $$
+            $$ p\left( {\widetilde{\delta }}_{rot2}\right)  = N\left( {{\widetilde{\delta }}_{rot2};0,{\alpha }_{5}\left| {\delta }_{rot2}\right|  + {\alpha }_{6}\left| {\delta }_{trans}\right| }\right) $$
                         {\small\kaishu 
             显然，平移造成的误差和旋转造成的误差不可能对所有机器人都是一比一的，因此我们设定一些参数$\alpha_i$来作为权重；对于旋转误差例如${\widetilde{\delta }}_{{rot}1}$，其误差组成包括旋转造成的旋转误差和平移造成的旋转误差两部分；平移误差同理。
             }
@@ -475,12 +475,12 @@ $$
                 \begin{figure}[H]
                 \centering
                 \includegraphics[width=0.6\textwidth]{images/alpha0.png}
-                \caption{不同$\alpha_i$参数下通过\textbf{闭式求解}得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
+                \caption{不同$\alpha_i$参数下通过\textbf{闭式求解}得到的$p(\mathrm{x}_t | \mathrm{x}_{t-1},\mathrm{u}_{t-1})$；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
                 \end{figure}
                 \begin{figure}[H]
                 \centering
                 \includegraphics[width=0.6\textwidth]{images/alpha.png}
-                \caption{不同$\alpha_i$参数下通过\textbf{随机采样求解}得到的$p(\mathrm{x}_t,\mathrm{x}_{t-1},\mathrm{u}_{t-1})$，每个子图含500个样本；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
+                \caption{不同$\alpha_i$参数下通过\textbf{随机采样求解}得到的$p(\mathrm{x}_t | \mathrm{x}_{t-1},\mathrm{u}_{t-1})$，每个子图含500个样本；对比发现，(a)图对旋转和平移误差的权重相对均一，图(b)平移误差权重更大，图(c)旋转误差权重更大}
                 \end{figure}
         
 \end{enumerate}
@@ -557,7 +557,7 @@ $$
         \]
         因为测量值=真实值+误差，我们希望同样利用误差分布进行建模。根据误差概率获得在$\mathbf{x}_t$观测到$\mathbf{z}_t$的可能性。由此来评估运动模型的$\mathbf{x}_t$是否准确。
     \begin{enumerate}
-        \item \textbf{特征传感器模型和观测模型}
+        \item \textbf{特征传感器模型的观测模型}
                     \begin{figure}[H]
                         \centering
                         \includegraphics[width=0.6\textwidth]{images/3lubiao.png}
