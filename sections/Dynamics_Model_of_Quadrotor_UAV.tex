@@ -331,15 +331,61 @@ Q:为什么不直接用P控制器？\\
     \caption{滑块例子}
 \end{figure}
 地面光滑，滑块运动，希望停止在红线位置。\\
-如图，如果采用上面的框图，一开始滑块距离很远，此时$x$差较大，会产生较大的速度，这样到了红线以后还会过冲，随即开始振荡；\\
+如图，如果采用上面的框图，一开始滑块距离很远，此时$x$差较大，加速度一直为正数，速度越来越快，这样到了红线以后还会过冲，之后一直这样反复，开始振荡，就是不能停在红线处；\\
 但是采用下面的框图，通过加一个内环，外环控制器会提前给一个希望的参考速度，实现“提前刹车”的作用。
+
+补充内容：从自控知识的角度理解：
+\[
+\dot{x}=v,\qquad \dot{v}=a\;(=u),\qquad e:=x_r-x
+\]
+
+\textbf{(1) 位置P直控加速度}
+\[
+a=K_p e
+\]
+\[
+\dot{e}=-v,\qquad \ddot{e}=-\dot{v}=-a=-K_p e
+\Rightarrow \boxed{\;\ddot{e}+K_p e=0\;}
+\]
+\[
+s^2+K_p=0 \;\Rightarrow\; s=\pm j\sqrt{K_p}
+\]
+极点是两个纯虚根，即阻尼比为0，等幅振荡
+
+\medskip
+\textbf{(2) 位置外环 + 速度内环（等效PD）}
+\[
+v_r=K_{p2} e,\qquad a=K_{p1}\,(v_r-v)
+   =K_{p1}K_{p2}e-K_{p1}v
+\]
+\[
+\dot{e}=-v,\qquad 
+\ddot{e}=-\dot{v}=-a
+      =-K_{p1}K_{p2}e+K_{p1}v
+      =-K_{p1}K_{p2}e-K_{p1}\dot{e}
+\]
+\[
+\Rightarrow \boxed{\;\ddot{e}+K_{p1}\dot{e}+K_{p1}K_{p2}e=0\;}
+\]
+与标准二阶系统 \(s^2+2\zeta\omega_n s+\omega_n^2=0\) 对比：
+\[
+\omega_n=\sqrt{K_{p1}K_{p2}},\qquad
+\zeta=\frac{K_{p1}}{2\sqrt{K_{p1}K_{p2}}}
+     =\frac{1}{2}\sqrt{\frac{K_{p1}}{K_{p2}}}
+\]
+\[
+\text{过阻尼条件： }\boxed{\;\zeta\ge 1\iff \dfrac{K_{p1}}{K_{p2}}\ge 4\;}
+\]
+\textit{等效PD： } \(a=k_p e-k_d \dot{x}\) ，其中 \(k_p=K_{p1}K_{p2},\;k_d=K_{p1}\)。
+\textit{整定要点：} 令内环快于外环（\(K_{p1}\gg K_{p2}\)）以获得足够阻尼并提前“刹车”。
+
 }}
 
 \item \textbf{速度、位置控制}\\
 根据
 $$\begin{bmatrix} \dot{x}^{E} \\ \dot{y}^{E} \\ \dot{z}^{E} \end{bmatrix} = \begin{bmatrix} v_{x}^{E} \\ v_{y}^{E} \\ v_{y}^{E} \end{bmatrix}$$
 $$
-\begin{bmatrix} \dot{v}_{x}^{E} \\ \dot{v}_{y}^{E} \\ \dot{v}_{z}^{E} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ g \end{bmatrix} + \mathfrak{R}_{B}^{E}(\phi,\theta,\psi)\begin{bmatrix} 0 \\ 0 \\ T \end{bmatrix} + \boldsymbol{D}$$
+\begin{bmatrix} \dot{v}_{x}^{E} \\ \dot{v}_{y}^{E} \\ \dot{v}_{z}^{E} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ g \end{bmatrix} + R_{B}^{E}(\phi,\theta,\psi)\begin{bmatrix} 0 \\ 0 \\ T \end{bmatrix} + \boldsymbol{D}$$
 可以进一步完善控制框图：
 \begin{figure}[H]
     \centering
