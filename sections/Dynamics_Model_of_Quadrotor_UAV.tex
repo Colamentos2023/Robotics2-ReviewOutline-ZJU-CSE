@@ -155,7 +155,7 @@ $$
 \noindent\textbf{欧拉角与角速率关系:}
 \begin{figure}
     \centering
-    \includegraphics[width=0.4\linewidth]{images/oulajiao.png}
+    \includegraphics[width=0.4\linewidth]{images/51.png}
     \caption{欧拉角与角速率关系}
 \end{figure}
 \[
@@ -280,7 +280,7 @@ $$
 在此基础上加一个反馈，构建如下图所示的控制律：
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/control1.png}
+    \includegraphics[width=0.6\linewidth]{images/52.png}
     \caption{俯仰速率控制}
 \end{figure}
 因为$I_{yy}$是一个很小的量，因此
@@ -291,13 +291,13 @@ $$\frac{q(s)}{q_{r}(s)}=\frac{K_{p}}{I_{yy}s+K_{p}}\approx1$$
 在上一小节的基础上，如果希望对角度$\theta$也进行控制，我们只需要加一个积分器：
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\linewidth]{images/control2.png}
+    \includegraphics[width=0.8\linewidth]{images/53.png}
     \caption{添加一个积分器}
 \end{figure}
 最终，我们形成：
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\linewidth]{images/control3.png}
+    \includegraphics[width=0.7\linewidth]{images/54.png}
     \caption{姿态控制器/串级控制器}
 \end{figure}
 $$G(s)=\frac{K_{p1}K_{p2}}{I_{yy}s^{2}+K_{p1}s+K_{p1}K_{p2}}$$
@@ -327,7 +327,7 @@ $$ {K}_{d}\frac{y\left( k\right)  - y\left( {k - 1}\right) }{T} $$
 Q:为什么不直接用P控制器？\\
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/control5.png}
+    \includegraphics[width=0.8\linewidth]{images/55.png}
     \caption{滑块例子}
 \end{figure}
 地面光滑，滑块运动，希望停止在红线位置。\\
@@ -349,7 +349,7 @@ $$
 \end{enumerate}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/control_sumary.png}
+    \includegraphics[width=0.7\linewidth]{images/56.png}
     \caption{无人机控制回路总结}
 \end{figure}
 

@@ -132,8 +132,8 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
             \item 计算非线性转换后实际概率分布的高斯近似
             \footnote{KF精确计算后验概率，而EKF只是有效估计后验概率的均值与方差。}
         \end{itemize}
-    \item \textbf{线性化近似}\\
-        我们在输入$x$的均值处进行一阶泰勒展开： 
+    \item \textbf{线性化近似}\ \
+       我们在输入$x$的均值处进行一阶泰勒展开： 
         $$g(x)=g(a)+g'(a)(x-a)$$
         $$g'(a)=\left.\frac{\partial g(x)}{\partial x}\right|_{a}$$
         以展开处即$x$的均值对应的输出$y$指作为$y$近似高斯的均值\footnote{实际上，我们在这个过程中已经有两个近似：
@@ -457,46 +457,79 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
         为避免指数级的巨大计算量，单独估计每个特征的最大可能对应\footnote{这是一个简化，是不相等的，在这种情况下，可能出现情况：A与某物体最大关联，B可能同时与该物体最大关联}
         $$
         \hat{c}_t^i = \arg\max_{c_t^i} p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})$$
-        $$\approx \arg\max_{c_t^i} \mathscr{N} \left( \mathbf{z}_t^i; h(\bar{\mathbf{\mu}}_t, c_t^i, \mathbf{m}), \mathbf{H}_t^i \bar{\mathbf{\Sigma}}_t \mathbf{H}_t^{iT} + \mathbf{Q}_t \right)$$
+        $$\approx \arg\max_{c_t^i} \mathscr{N} \left( \mathbf{z}_t^i; h(\bar{\mathbf{\mu}}_t, c_t^i, \mathbf{m}), \mathbf{H}_t^i \bar{\boldsymbol{\Sigma}}_t \mathbf{H}_t^{iT} + \mathbf{Q}_t \right)$$
         \textbf{推导过程}：
         {\small\kaishu{
-        \begin{enumerate}
-          \item 目标估计问题：
-          $$\hat{c}_t^i=\arg\max_{c_t^i} p\big(z_t^i \mid C^t, m, Z^{t-1}, U^{t-1}\big).$$
-        
-          \item 预测先验（状态的预测分布，高斯假定）：
-          $$p(x_t\mid Z^{t-1},U^{t-1})\approx\mathcal{N}\big(x_t;\,\bar\mu_t,\bar\Sigma_t\big).$$
-        
-          \item 观测模型与线性化：设
-          $$z_t^i=h(x_t,c_t^i,m)+v_t,\qquad v_t\sim\mathcal{N}(0,Q_t).$$
-          在$x_t=\bar\mu_t$处一阶泰勒展开：
-          $$h(x_t,c_t^i,m)\approx h(\bar\mu_t,c_t^i,m)+H_t^i\,(x_t-\bar\mu_t),$$
-          其中
-          $$H_t^i=\left.\frac{\partial h(x,c_t^i,m)}{\partial x}\right|_{x=\bar\mu_t}.$$
-        
-          \item 由线性化得到观测的预测分布（高斯传播）：
-          $$p(z_t^i\mid C^t,m,Z^{t-1},U^{t-1})\approx
-            \mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),\;S_t^i\big),$$
-          其中
-          $$S_t^i=H_t^i\,\bar\Sigma_t\,{H_t^i}^\top+Q_t.$$
-        
-          \item 将极大化似然转为对数似然并化简：对每个候选关联$c_t^i$，
-          $$\begin{aligned}
-            \hat{c}_t^i
-            &=\arg\max_{c_t^i}\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),S_t^i\big)\\
-            &=\arg\min_{c_t^i}\Big\{\;-\ln\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),S_t^i\big)\;\Big\}\\
-            &=\arg\min_{c_t^i}\Big\{\tfrac{1}{2}(z_t^i-h(\bar\mu_t,c_t^i,m))^\top {S_t^i}^{-1}(z_t^i-h(\bar\mu_t,c_t^i,m))
-              +\tfrac{1}{2}\ln|S_t^i|\Big\},
-          \end{aligned}$$
-          其中常数项已省略。
-        
-          \item 若各候选的协方差$S_t^i$相近，可进一步简化为仅比较马氏距离：
-          $$\hat{c}_t^i=\arg\min_{c_t^i}\;(z_t^i-h(\bar\mu_t,c_t^i,m))^\top {S_t^i}^{-1}(z_t^i-h(\bar\mu_t,c_t^i,m)).$$
-        
-          \item 因此得到近似表达：
-          $$\hat{c}_t^i\approx\arg\max_{c_t^i}\mathcal{N}\big(z_t^i;\,h(\bar\mu_t,c_t^i,m),\;H_t^i\bar\Sigma_t{H_t^i}^\top+Q_t\big).$$
-        \end{enumerate}
+        $$
+        p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})$$
+        由于$\mathbf{x}_t$与$\mathbf{z}_t$相关，但是在条件里却没有，所以我们得把这个隐变量弄出来，写成二者的联合概率分布；实际上原式就等于下面这个联合概率分布对$\mathbf{x_t}$积分：
+        $$p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})=\int p(\mathbf{z}_t^i,\mathbf{x}_t | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})\mathrm{d}\mathbf{x}_t$$   
+        使用乘法规则：
+        $$p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})=\int p(\mathbf{z}_t^i |\mathbf{x}_t,C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})p(\mathbf{x}_t |C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})\mathrm{d}\mathbf{x}_t$$  
+        则积分内是两个高斯分布，即两个高斯分布的卷积：
+        \begin{align}
+        p(\mathbf{z}_t^i \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})
+        &= \int p(\mathbf{z}_t^i,\mathbf{x}_t \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})\,\mathrm{d}\mathbf{x}_t \\
+        &= \int p(\mathbf{z}_t^i \mid \mathbf{x}_t,C^t,\mathbf{m})\; p(\mathbf{x}_t \mid \mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})\,\mathrm{d}\mathbf{x}_t .
+        \end{align}
+        接下来我们只需要算出这两个高斯分布的均值和方差即可。\\
+        \noindent\textbf{两项分别为高斯：}
+\[
+p(\mathbf{x}_t \mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1})
+=\mathcal{N}\!\big(\mathbf{x}_t;\ \bar{\boldsymbol{\mu}}_t,\ \bar{\boldsymbol{\Sigma}}_t\big),
+\qquad
+p(\mathbf{z}_t^{\,i}\mid \mathbf{x}_t,c_t^i,\mathbf{m})
+\approx \mathcal{N}\!\Big(\mathbf{z}_t^{\,i};\ \mathbf{h}_t^{\,i} + \mathbf{H}_t^{\,i}\!\big(\mathbf{x}_t-\bar{\boldsymbol{\mu}}_t\big),\ \mathbf{Q}_t\Big),
+\]
+其中
+\[
+\mathbf{h}_t^{\,i} \;=\; h\!\big(\bar{\boldsymbol{\mu}}_t,\ c_t^i,\ \mathbf{m}\big), 
+\qquad 
+\mathbf{H}_t^{\,i} \;=\; \left.\dfrac{\partial h(\mathbf{x}_t,\ c_t^i,\ \mathbf{m})}{\partial \mathbf{x}_t}\right|_{\mathbf{x}_t=\bar{\boldsymbol{\mu}}_t}.
+\]
+
+\noindent\textbf{写成线性—高斯形式：}
+\[
+\mathbf{z}_t^{\,i}
+= \underbrace{\big(\mathbf{h}_t^{\,i} - \mathbf{H}_t^{\,i}\,\bar{\boldsymbol{\mu}}_t\big)}_{\displaystyle \mathbf{b}_t^{\,i}}
+\;+\; \mathbf{H}_t^{\,i}\,\mathbf{x}_t \;+\; \boldsymbol{\omega}_t,
+\quad \boldsymbol{\omega}_t \sim \mathcal{N}(\mathbf{0},\mathbf{Q}_t),\quad
+\mathbf{x}_t \sim \mathcal{N}(\bar{\boldsymbol{\mu}}_t,\bar{\boldsymbol{\Sigma}}_t).
+\]
+
+\noindent\textbf{线性高斯变换的矩（这里我们直接给出）：}
+\[
+\mathbb{E}[\mathbf{z}_t^{\,i}]
+= \mathbf{b}_t^{\,i} + \mathbf{H}_t^{\,i}\,\bar{\boldsymbol{\mu}}_t
+= \mathbf{h}_t^{\,i},
+\qquad
+\mathrm{Cov}[\mathbf{z}_t^{\,i}]
+= \mathbf{H}_t^{\,i}\,\bar{\boldsymbol{\Sigma}}_t\,(\mathbf{H}_t^{\,i})^\top + \mathbf{Q}_t
+\;\; \triangleq\;\; \mathbf{S}_t^{\,i}.
+\]
+
+\noindent\textbf{从而积分结果（两个高斯的卷积）为：}
+\[
+p(\mathbf{z}_t^{\,i} \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})
+= \int p(\mathbf{z}_t^{\,i}\mid \mathbf{x}_t,c_t^i,\mathbf{m})\;
+        p(\mathbf{x}_t\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1})\; \mathrm{d}\mathbf{x}_t
+= \mathcal{N}\!\big(\mathbf{z}_t^{\,i};\ \mathbf{h}_t^{\,i},\ \mathbf{S}_t^{\,i}\big).
+\]
+
+\noindent\textbf{代入最大似然数据关联即得：}
+\[
+\hat{c}_t^{\,i}
+= \arg\max_{c_t^{\,i}}
+\; \mathcal{N}\!\Big(
+\mathbf{z}_t^{\,i};\ h\!\big(\bar{\boldsymbol{\mu}}_t,\ c_t^{\,i},\ \mathbf{m}\big),
+\ \mathbf{H}_t^{\,i}\,\bar{\boldsymbol{\Sigma}}_t\,(\mathbf{H}_t^{\,i})^\top + \mathbf{Q}_t
+\Big).
+\]
+    
+    
+        %请您作为移动机器人领域的专家，以最严谨、最准确、最认真的态度，完成证明推导过程，言简意赅，只包含必要公式和文字，最简证明但是逻辑必须清晰、推导必须完整，最好参考前文的内容的符号和说明，或者直接用前文中的推导过程这样更好，使得读者更容易理解，分别求两个高斯分布的均值和方差，最后合到一起%
         }}
+
     \end{itemize}
     
     
@@ -572,7 +605,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                     根据三个独立的观测，我们分别能得到一个建议分布；而结合三个观测的条件下，得到的分布就是目标分布。
                     \begin{figure}[H]
                         \centering
-                        \includegraphics[width=0.5\linewidth]{images/proposal.png}
+                        \includegraphics[width=0.5\linewidth]{images/fenbu1.png}
                         \caption{建议分布（上三）和目标分布（下右）}
                     \end{figure}
                     首先根据建议分布进行采样，得到下图中上方三个图的建议分布的粒子，汇总在一起即为总样本集合
@@ -587,7 +620,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                     $$ p\left( {\mathbf{x} \mid  {\mathbf{z}}_{l}}\right)  = \frac{p\left( {{\mathbf{z}}_{l} \mid  \mathbf{x}}\right) p\left( \mathbf{x}\right) }{p\left( {\mathbf{z}}_{l}\right) } $$
                     权重计算\footnote{可以观察下式的分子，我们知道$\mathbf{x}$指的就是粒子位置。那么，例如对建议分布$p(\mathbf{x} | \mathbf{z}_1)$，我们评估该建议分布下每一个粒子位置上能观察到$\mathbf{z}_2$，$\mathbf{z}_3$的可能性，如果可能性高，自然对重采样到目标分布的重要性高，即权重高，更趋近于目标分布即机器人实际位置}
                     $$ \omega  = \frac{p\left( {\mathbf{x} \mid  {\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right) }{p\left( {\mathbf{x} \mid  {\mathbf{z}}_{l}}\right) } = \frac{p\left( {\mathbf{z}}_{l}\right) \mathop{\prod }\limits_{{k \neq  l}}p\left( {{\mathbf{z}}_{k} \mid  \mathbf{x}}\right) }{p\left( {{\mathbf{z}}_{1},\ldots ,{\mathbf{z}}_{n}}\right) } $$
-                    之后按照权重重新采样即可。
+                    之后按照权重重新采样即可。这里是把路标而不是运动模型作为建议分布，后面建议分布常用运动模型。
                     \begin{figure}[H]
                         \centering
                         \includegraphics[width=0.5\linewidth]{images/after_resample.png}
@@ -617,7 +650,6 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                 \[
                     x_t^{[i]} \sim p(x_t \mid Z^t, U^{t-1}, m)
                 \]
-                \vspace{2mm}
                 \item 某一粒子从0时刻到当前时刻的序列
                 \[
                     x_{0:t}^{[i]} = x_0^{[i]}, x_1^{[i]}, \ldots, x_t^{[i]}
@@ -634,7 +666,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                     \item 利用观测模型来计算粒子的权重
                     \item 根据权重重新采样,生成表示当前时刻信度的粒子集合 \( {\mathcal{X}}_{t} \)
                 \end{enumerate}
-                \begin{algorithm}[ht]
+                \begin{algorithm}[H]
                 \caption{Particle filter}
                 \label{alg:particle_filter}
                 \begin{algorithmic}[1]
@@ -733,7 +765,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
               \caption{粒子滤波实例，该方法适用于全局定位}
               \label{fig:particle_filter_examples}
             \end{figure}
-            \item \textbf{PF算法中的误差}\footnote{回顾：EKF的误差来自于两个方面：非高斯分布近似为高斯分布，非线性函数近似为线性函数}：
+            \item \textbf{PF算法中的误差}：
                 \begin{enumerate}
                     \item \textbf{由样本集合近似带来的系统偏差}
                         \begin{itemize}
@@ -748,9 +780,10 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                     \item \textbf{由随机采样带来的偏差}
                         \begin{itemize}
                             \item 随机采样实际上是对原来概率分布的离散化，如下图所示，由粒子还原得到的概率分布与真实概率分布有差异，且粒子越少误差越大
+                            \item 由随机采样所带来的偏差称为采样器方差
                             \begin{figure}[H]
                                 \centering
-                                \includegraphics[width=0.5\linewidth]{images/sample_error.png}
+                                \includegraphics[width=0.5\linewidth]{images/sample_error2.png}
                                 \caption{随机采样带来误差}
                             \end{figure}
                         \end{itemize}
@@ -764,16 +797,15 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                 \begin{itemize}
                     \item 根据\textbf{权重方差}决定是否重采样
                     $$ {\widehat{N}}_{\text{ eff }} = \frac{1}{\mathop{\sum }\limits_{{i = 1}}^{M}{\left( {\omega }_{t}^{\left\lbrack  i\right\rbrack  }\right) }^{2}}\;\left\{  \begin{array}{lll} \text{ resample } & {\widehat{N}}_{\text{ eff }} > {\bar{N}}_{\text{ thre }} & \\  \text{ not resample } & \text{ otherwise } \end{array}\right. $$
-                    \item 无论是否重采样，保持权重估计\footnote{权重估计仍然在做，但是做完之后不一定重采样了，如果不重采样的话，权重与上次的权重不断叠加直到下一次重采样后再全都均匀分布}
+                    \item 无论是否重采样，\textbf{保持权重估计}\footnote{权重估计仍然在做，但是做完之后不一定重采样了，如果不重采样的话，权重与上次的权重不断叠加直到下一次重采样后再全都均匀分布}
                     $$ {\omega }_{t}^{\left\lbrack  m\right\rbrack  } = \left\{  \begin{array}{ll} 1/M & \text{ if }{resampling}\;{took}\;{place} \\  p\left( {{\mathbf{z}}_{t}^{ \intercal  }|{\mathbf{x}}_{t}^{\left\lbrack  m\right\rbrack  }}\right) {\omega }_{t - 1}^{\left\lbrack  m\right\rbrack  } & {if}\;{no}\;{resampling}\;{took}\;{place} \end{array}\right. $$
                 \end{itemize}
+                \textbf{小结}：
                 \begin{itemize}
                     \item \textcolor{red}{重采样次数过多，会导致粒子失去多样性；重采样次数过少，会让大量粒子分布在概率低的区域，收敛慢。}
                     \item \textcolor{red}{粒子数过多则计算浪费；粒子数过少则不能覆盖可能状态区域；一般在全局定位时需要较多粒子，收敛后转为位置跟踪，只需少量粒子。}
                 \end{itemize}
-        \end{itemize}
-            \textbf{小结}：
-            \begin{table}[htbp]
+            \begin{table}[H]
               \centering
               \caption{EKF与PF的对比}
               \label{tab:ekf_pf}
@@ -792,6 +824,8 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                 \bottomrule
               \end{tabular}
             \end{table}
+        \end{itemize}
+            
             \item \textbf{绑架问题}
             \begin{figure}[H]
                 \centering
@@ -799,7 +833,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                 \caption{绑架问题示例}
             \end{figure}
             \textbf{绑架检测}：检测\textbf{一段时间内}的\textbf{观测模型}概率分布，如果概率都很低，说明粒子都偏离了真值
-            $$ p\left( {{\mathbf{Z}}_{t} \mid  {\mathbf{Z}}^{t - 1},{\mathbf{u}}_{{t1} : t - 1},\mathbf{m}}\right)  \approx  \textcolor{red}{\mathop{\sum }\limits_{{{t}^{\prime } = {t_1}}}}\frac{1}{M}\mathop{\sum }\limits_{{m = 1}}^{M}{\omega }_{{t}^{\prime }}^{\left\lbrack  m\right\rbrack  } $$
+            $$ p\left( {{\mathbf{Z}}_{t} \mid  {\mathbf{Z}}^{t - 1},{\mathbf{u}}_{{1} : t - 1},\mathbf{m}}\right)  \approx  \textcolor{red}{\mathop{\sum }\limits_{{{t}^{\prime } = {t_1}}}}\frac{1}{M}\mathop{\sum }\limits_{{m = 1}}^{M}{\omega }_{{t}^{\prime }}^{\left\lbrack  m\right\rbrack  } $$
             \textbf{解决办法}：调整粒子分布\footnote{两种办法，一种是识别到被绑架后从头再来，把点均匀随机撒到全图上重新慢慢收敛到新位置上；另一种是头铁，硬顶着问题根据观测让粒子逐渐收敛到新位置上}：
                 \begin{itemize}
                     \item (1)在位姿空间均匀分布，利用当前观测评估权重
@@ -829,7 +863,31 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
                     \includegraphics[width=0.6\linewidth]{images/liti.png}
                     \caption{粒子滤波例题}
                 \end{figure}
+
+                解：\\
+                (a)由题意。建议分布这里用观测模型而不是运动模型，分别为$$p(\mathbf{x}_t|\mathbf{z}_1),p(\mathbf{x}_t|\mathbf{z}_2),p(\mathbf{x}_t|\mathbf{z}_3)$$
+                目标分布是：$$p(\mathbf{x}_t|\mathbf{z}_1,\mathbf{z}_2,\mathbf{z}_3)$$
+                则权重计算与前面的理论部分相同。
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.6\linewidth]{images/liti3.png}
+                    \caption{粒子滤波例题(a)，蓝色的是建议分布在这里画粒子即可}
+                \end{figure}
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.6\linewidth]{images/liti4.png}
+                    \caption{粒子滤波例题(a)，重采样后粒子分布集中在红色区域}
+                \end{figure}
+                (b)同理，但是扩展到四个对称方向上，这里直接给出重采样后的分布：
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.6\linewidth]{images/liti5.png}
+                    \caption{粒子滤波例题(b)，重采样后粒子分布集中在四个圆形区域}
+                \end{figure}
                 }}
+
+                
+                
 \end{enumerate}
 \subsection{目前常用定位系统}
     新方法例如3D-ICP，ORB-SLAM-loc，ROVIO-loc总体仍然是贝叶斯滤波+马尔科夫架构。
