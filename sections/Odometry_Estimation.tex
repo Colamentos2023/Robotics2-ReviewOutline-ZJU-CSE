@@ -150,8 +150,8 @@
         \item 四元数的优点：
         \begin{itemize}
             \item 表达更紧凑；
-            \item 求解无奇异
-            \item 计算更快速
+            \item 求解无奇异；
+            \item 计算更快速。
         \end{itemize}
     \end{itemize}
 
@@ -328,7 +328,7 @@
                 \]
             \end{enumerate}
 
-            \item \textbf{R, t 分解计算说明：}
+            \item \textbf{化简目标函数}
             \begin{align*}
                 \frac{1}{2}\sum_{i=1}^{n}\|\mathbf{p}_i - (R\mathbf{p}'_i + t)\|^2 
                 &= \frac{1}{2}\sum_{i=1}^{n}\|(\mathbf{p}_i - \mathbf{p}) - R(\mathbf{p}'_i - \mathbf{p}')\|^2 
@@ -380,7 +380,106 @@
             t = \mathbf{p} - R \mathbf{p}'
             \]
             \end{small}
+            
         \end{itemize}
+
+\textbf{SVD求解例子}
+
+为了让读者更容易理解SVD的计算过程，我利用gpt得到这个例子，可以查看：
+
+取两对点：$p_1=(1,0),p_2=(0,1)$，$q_1=(0,1),q_2=(-1,0)$。\\
+去中心化：$\bar p=(\tfrac12,\tfrac12),\ \bar q=(-\tfrac12,\tfrac12)$，
+\[
+\tilde p_1=(\tfrac12,-\tfrac12),\ \tilde p_2=(-\tfrac12,\tfrac12),\quad
+\tilde q_1=(\tfrac12,\tfrac12),\ \tilde q_2=(-\tfrac12,-\tfrac12).
+\]
+互协矩阵
+\[
+W=\tilde q_1\tilde p_1^{\top}+\tilde q_2\tilde p_2^{\top}
+=\begin{bmatrix}\tfrac12&-\tfrac12\\[2pt]\tfrac12&-\tfrac12\end{bmatrix}.
+\]
+
+\[
+W=\begin{bmatrix}\tfrac12&-\tfrac12\\[2pt]\tfrac12&-\tfrac12\end{bmatrix}.
+\]
+
+\paragraph{(1) 求 $C$}
+
+$C=W^\top W=\begin{bmatrix}\tfrac12&-\tfrac12\\[2pt]-\tfrac12&\tfrac12\end{bmatrix}
+=\tfrac12\!\begin{bmatrix}1&-1\\-1&1\end{bmatrix}$。
+
+\paragraph{(2) 求 $C$ 的特征分解：特征值 $\lambda_1=1,\ \lambda_2=0$，}
+对应单位特征向量可取
+\[
+v_1=\tfrac{1}{\sqrt2}\!\begin{bmatrix}1\\[-2pt]-1\end{bmatrix},\quad
+v_2=\tfrac{1}{\sqrt2}\!\begin{bmatrix}1\\[ -2pt]1\end{bmatrix}.
+\]
+于是
+\[
+V=\begin{bmatrix}v_1&v_2\end{bmatrix},\quad
+S=\mathrm{diag}(1,0).
+\]
+
+
+\paragraph{(3) 计算 $U$}
+
+先由 $C=W^\top W$ 的特征分解得到特征值 $\lambda_1=1,\ \lambda_2=0$，据此
+\[
+\sigma_1=\sqrt{\lambda_1}=1>0\quad(\text{非零奇异值}),\qquad
+\sigma_2=\sqrt{\lambda_2}=0.
+\]
+右奇异向量取为 $v_1=\tfrac{1}{\sqrt{2}}\!\begin{bmatrix}1\\[-2pt]-1\end{bmatrix}$，
+$v_2=\tfrac{1}{\sqrt{2}}\!\begin{bmatrix}1\\[-2pt]1\end{bmatrix}$。
+
+\medskip
+\noindent\textbf{(a) 对“非零奇异值”分量：用 $u_i=\frac{1}{\sigma_i}Wv_i$}
+\[
+u_1=\frac{1}{\sigma_1}Wv_1
+= W\!\left(\tfrac{1}{\sqrt2}\!\begin{bmatrix}1\\[-2pt]-1\end{bmatrix}\right)
+=\tfrac{1}{\sqrt2}\!\begin{bmatrix}1\\[2pt]1\end{bmatrix},\qquad \|u_1\|_2=1.
+\]
+
+\noindent\textbf{(b) 对“零奇异值”分量：用\emph{正交补 / 左零空间}补齐 $U$}
+
+当 $\sigma_2=0$ 时，公式 $u_2=\tfrac{1}{\sigma_2}Wv_2$ 不可用（会除以 0）。
+此时从 $W$ 的\emph{左零空间}中取 $u_2$：求解
+\[
+W^\top u_2=0,\qquad \|u_2\|_2=1,\qquad u_2^\top u_1=0.
+\]
+对本例，$W^\top=\begin{bmatrix}\tfrac12&\tfrac12\\[2pt]-\tfrac12&-\tfrac12\end{bmatrix}$，
+解 $W^\top u_2=0$ 可得 $u_2\propto\begin{bmatrix}-1\\[2pt]1\end{bmatrix}$，
+单位化并与 $u_1$ 正交后取
+\[
+u_2=\tfrac{1}{\sqrt2}\!\begin{bmatrix}-1\\[2pt]1\end{bmatrix}.
+\]
+
+
+\medskip
+\noindent\textbf{(c) 拼装 $U$}
+\[
+U=\begin{bmatrix}u_1 & u_2\end{bmatrix}
+=\frac{1}{\sqrt2}\begin{bmatrix}
+1 & -1\\[2pt]
+1 & \phantom{-}1
+\end{bmatrix}.
+\]
+（最后可检验 $U^\top U=I$ 与 $USV^\top=W$）
+
+
+根据如上步骤，例题 SVD 可写为
+\[
+U=\frac{1}{\sqrt2}\!\begin{bmatrix}-1&-1\\-1&1\end{bmatrix},\quad
+S=\mathrm{diag}(1,0),\quad
+V^{\top}=\frac{1}{\sqrt2}\!\begin{bmatrix}-1&1\\[2pt]1&1\end{bmatrix},
+\]
+故
+\[
+R=VU^{\top}=
+\begin{bmatrix}0&1\\[-2pt]-1&0\end{bmatrix}\ (\text{$-90^\circ$ 旋转}),\qquad
+t=\bar q - R\,\bar p=(-1,\,1)^{\top}.
+\]
+验证：$R p_1+t=(0,1)$，$R p_2+t=(-1,0)$，与 $q_1,q_2$ 完全一致。
+
 
         \item \textbf{关于ICP的思考}
         \begin{itemize}
@@ -394,6 +493,19 @@
             \item \textbf{Q: 对于移动机器人来讲，两帧点云数据做ICP的初值如何获得？} \\
             \textbf{A:} 初始位姿可由\textbf{里程计（Odometry）}、\textbf{IMU惯性测量单元}、或\textbf{上一帧的位姿估计结果}提供。  
             这些先验信息可作为ICP的初值输入，使迭代更快收敛并避免陷入局部最优。
+
+            \item \textbf{Q: 为什么已经有了点到点icp，还要有line2line、surface2surface呢？}\\
+            \textbf{A:} 点到点 ICP 只最小化最近邻点间的欧氏距离，对沿目标表面的切向滑移约束很弱，易受噪声/密度影响而收敛慢、对初值敏感；将约束提升为线到线或面到面，把\textbf{方向/法向与局部协方差}纳入残差，显著增强可观测性与几何约束。收敛更快、鲁棒性更强、可收敛初值域更大。
+
+            \item \textbf{Q: 点与点之间如何进行匹配？说明最近邻匹配原理，给出误差公式}\\
+            \textbf{A:} 将源点云 $P'$ 在当前位姿 $(R,t)$ 下变换为 $R\mathbf p'_i+t$，在参考点云 $P$ 中为每个变换后的点寻找最近邻 $\mathbf p_{j(i)}=\arg\min_{\mathbf p_j\in P}\|\,\mathbf p_j-(R\mathbf p'_i+t)\|$ 并建立对应。对应固定后，点到点误差与目标函数为 $\mathbf e_i=\mathbf p_{j(i)}-(R\mathbf p'_i+t)$，$E(R,t)=\tfrac12\sum_i\|\mathbf e_i\|^2$。
+            
+            \item \textbf{Q: 如何根据优化求出 $R$ 和 $t$？SVD 分解的作用是？}\\
+            \textbf{A:} 去质心后定义 $\mathbf q_i=\mathbf p_{j(i)}-\mathbf p,\ \mathbf q'_i=\mathbf p'_i-\mathbf p'$ 与 $W=\sum_i \mathbf q'_i\mathbf q_i^\top=USV^\top$，最优旋转为 $R^*=V\,\mathrm{diag}(1,1,\mathrm{sign}(\det(VU^\top)))\,U^\top$，平移为 $t^*=\mathbf p-R^*\mathbf p'$。SVD 的作用是对互相关矩阵 $W$ 做正交分解，从而在 $SO(3)$ 约束下给出闭式的最优 $R$ 并避免反射解。
+            
+            \item \textbf{Q: 初始对齐不好对于迭代的影响是？如何获得较好的初始对齐？}\\
+            \textbf{A:} 初值偏差大会缩小收敛域、导致错误对应与局部极小（甚至发散），并显著增加迭代次数。可用里程计/IMU/视觉里程计外推作初值，再交给 ICP 精细配准。
+
         \end{itemize}
     \end{itemize}
     \item \textbf{视觉里程计}\label{visual}
@@ -457,7 +569,7 @@
                                 \begin{itemize}
                                     \item \textbf{关键点}：\textbf{Oriented FAST} 
                                         \begin{itemize}
-                                            \item \textbf{角点}\footnote{角点（corner） 是一种特定类型的特征点（feature point）；而关键点（keypoint） 是在角点基础上进一步赋予了尺度、方向等属性的“可匹配特征点”。}：局部像素灰度变化明显的像素。
+                                            \item \textbf{角点}\footnote{角点（corner） 是一种特定类型的特征点（feature point）；而关键点（keypoint） 是在角点基础上进一步赋予了尺度、方向等属性的“可匹配特征点”。关键点是特征点的真子集，角点是关键点的一种}：局部像素灰度变化明显的像素。
                                             \item \textbf{角点获取方法}：
                                                 \begin{figure}[H]
                                                     \centering
@@ -477,7 +589,7 @@
                                                     \end{minipage}
                                                 \end{figure}
                                                 \textbf{FAST}：Features from Accelerated Segment Test，以像素点为中心一定半径的圆上，有连续N个点与像素灰度值差大于阈值
-                                                \textbf{Oriented FAST}：FAST的优化，通过构建\textbf{图像金字塔}\footnote{在不同尺度（图像大小）下都能检测到稳定的特征点，将原始图像逐层下采样，形成多层图像，使物体在图像中变大或变小，检测出的关键点位置仍然一致。}和\textbf{灰度质心法}\footnote{它通过计算角点邻域的灰度质心（intensity centroid）来求出主方向角，根据灰度值总和与坐标-灰度值乘积总和计算质心坐标。无论图像如何旋转，ORB都会调整描述子的方向，使得特征点的描述结果保持一致}使特征具有\textbf{尺度不变性和旋转不变性}
+                                                \textbf{Oriented FAST}：FAST的优化，通过构建\textbf{图像金字塔}\footnote{在不同尺度（图像大小）下都能检测到稳定的特征点，将原始图像逐层下采样，形成多层图像，使物体在图像中变大或变小，检测出的关键点位置仍然一致。}和\textbf{灰度质心法}\footnote{它通过计算角点邻域的灰度质心（intensity centroid）来求出主方向角，根据灰度值总和与坐标-灰度值乘积总和计算质心坐标。无论图像如何旋转，ORB都会调整描述子的方向，使得特征点的描述结果保持一致}使特征具有\textbf{尺度不变性（图像金字塔）和旋转不变性（灰度质心法）}
 
                                         \end{itemize}
                                     \item \textbf{描述子}:\textbf{BRIEF} (Binary Robust Independent Elementary Feature)
@@ -495,11 +607,15 @@
                                     \item \textbf{反向匹配}：由于第一帧图像中的特征可能在第二帧图像中找到多个对应，因此需要进行\textbf{交叉一致性验证}，即第二帧图像中的所有特征与第一帧图像中的所有特征进行比较，建立对应关系，当彼此相互存在对应关系时才认为匹配
                                 \end{enumerate}
                             \item \textbf{增加约束条件}：核心目的是限制搜索区域\\
-                            \noindent\textbullet\quad{区域约束}：根据运动预测
+                            \noindent\textbullet\quad{区域约束}：根据运动预测\footnote{若两帧相隔很近，可预测像素落点的小窗口，只在局部搜；适用于小位移、光照恒定的场景}
                                 \begin{itemize}
                                     \item \textbf{特征点}：需要具备\textbf{三维空间位置}信息；
                                     \item \textbf{适用性}：适用于\textbf{运动偏移量较小、图像变化较小}的情况；
-                                    \item 若要在\textbf{长图像序列}上采用跟踪策略，则需对每个特征建立\textbf{仿射变形模型}\footnote{以描述随时间的尺度、旋转和视角变化}；
+                                    \item 若要在\textbf{长图像序列}上采用跟踪策略，则需对每个特征建立\textbf{仿射变形模型}\footnote{用以描述随时间的尺度、旋转和视角变化，在长序列跟踪中，关键点邻域的外观会随视点变化产生尺度变化、旋转、透视畸变等。通常可将小邻域内的外观变化近似为二维仿射变换：
+\[
+\mathbf{x}' \approx A\,\mathbf{x} + \mathbf{b},\quad A\in\mathbb{R}^{2\times 2},\ \mathbf{b}\in\mathbb{R}^2.
+\]
+“对每个特征建立仿射变形模型”即为每个被跟踪的关键点维护其局部补丁的仿射参数 $(A,\mathbf{b})$（或其参数化，如尺度、旋转、剪切等），并在跨帧配准时同时估计这些参数，使得补丁在当前帧经过该仿射扭曲后与上一帧更一致。这样可以显著提高跟踪在尺度变化、倾斜与小视角变化下的稳定性。}；
                                 \end{itemize}
                             \noindent\textbullet\quad \textbf{极线约束}：根据立体视觉
                                 \begin{itemize}
@@ -530,15 +646,23 @@
                     x_1 = K^{-1} \tilde{p}, \quad x_2 = K^{-1} p,
                     \]
                     其中 $K$ 为相机内参矩阵。
-                    \item 对极约束公式如下，
+                    \item 对极约束公式如下\footnote{由于对极约束为 \( \mathbf{x}_2^\top E\,\mathbf{x}_1 = 0\)，将 \(E\) 乘以任意非零标量不会改变该约束，故 \(E\) 是“比例不变”的；这意味着单目 2D-2D 只能恢复 \(t\) 的方向，无法从 \(E\) 中获得 \(t\) 的绝对尺度。}：
                     \[
-                    x_1^T E x_2 = 0, \quad \text{其中 } E = [t]_\times R.
+                    x_1^T E x_2 = 0
                     \]
-                    \item 本质矩阵 $E$ 与基础矩阵 $F$ 的关系为：
+                    \[
+                    E = [t]_\times R,\qquad
+                    [t]_\times =
+                    \begin{bmatrix}
+                    0 & -t_z & t_y\\
+                    t_z & 0 & -t_x\\
+                    -t_y & t_x & 0
+                    \end{bmatrix}.
+                    \]
+                    \item 本质矩阵 $E$ 与基础矩阵 $F$ 的关系为\footnote{几何意义：两相机中心与空间点形成的三角面称为“极平面”，极平面在两幅图像上与像平面交于“极线”，同一空间点的成像点必须分别位于对应极线上。}：
                     \[
                     F = K^{-T} E K^{-1}, \quad \text{对极约束 } p^T F \tilde{p} = 0.
                     \]
-                    \footnote{几何意义：两相机中心与空间点形成的三角面称为“极平面”，极平面在两幅图像上与像平面交于“极线”，同一空间点的成像点必须分别位于对应极线上。}
             \end{enumerate}
 
             \item \textbf{运动估计的求解步骤}
@@ -548,7 +672,7 @@
             \end{enumerate}
         \end{itemize}
         \begin{small}\kaishu
-        ==============================\\
+        ==============================
         \item \textbf{本质矩阵的求解：八点法}
         \\$E$ 在不同尺度下等价，因此仅需8对匹配点即可求解——称为\textbf{八点法}
         \begin{itemize}
@@ -588,7 +712,7 @@
             \]
             \item 由此可求得 $E$ 的各元素。
         \end{itemize}
-        ==============================\\
+        ==============================
         \item \textbf{从 $E$ 估计 $R, t$}
         \begin{itemize}
             \item 采用\textbf{SVD分解方法}：
@@ -596,19 +720,119 @@
             E = U \Sigma V^T,
             \]
             \item 分解可得4种可能的 $(R, t)$ 组合；
-            \item 通过代入一点验证该点在两个相机下的深度是否均为正，从而确定正确解。
+            \item 通过代入一点验证该点在两个相机下的深度是否均为正，从而确定正确解。\footnote{给定由本质矩阵分解得到的四组候选 \((R,t)\)，令 \(P_1=[I\ |\ 0]\)、\(P_2=[R\ |\ t]\)，对若干内点匹配 \((\mathbf{x}_1,\mathbf{x}_2)\) 用线性三角化求 \(\tilde X\)，并计算深度 \(\lambda_1=(P_1\tilde X)_z,\ \lambda_2=(P_2\tilde X)_z\)。选择使得绝大多数点同时满足 \(\lambda_1>0,\ \lambda_2>0\) 的那一组 \((R,t)\)，即为物理解（点位于两相机前方）。}
                                                 \begin{figure}[H]
                                                     \centering
                                                     \includegraphics[width=0.7\textwidth]{images/SVD.png}
                                                     \caption{从E分解到R、t存在四种可能性}
                                                 \end{figure}
-        ==============================\\
+
+            \textbf{从本质矩阵的 SVD 到四组 $(R,t)$ 以及正深度检验的方法可以参考如下过程，本部分是自行添加的，可选择性阅读，不感兴趣的读者请跳到RANSAC}
+
+\paragraph{(1) SVD 的可计算定义（$U,\Sigma,V$ 到底“怎么算”）}
+对任意 $3{\times}3$ 实矩阵 $E=[e_{ij}]$，其奇异值与奇异向量满足
+\[
+EE^\top\,\mathbf{u}_k \;=\; \sigma_k^2\,\mathbf{u}_k,\qquad
+E^\top E\,\mathbf{v}_k \;=\; \sigma_k^2\,\mathbf{v}_k,
+\]
+其中 $\{\sigma_k\}_{k=1}^3$ 为非负实数（奇异值）\\
+当 $\sigma_k>0$ 时：
+\\$\{\mathbf{u}_k\}$是$EE^T$的特征向量作单位化，即$E$的左奇异向量
+\\$\{\mathbf{v}_k\}$是$E^TE$的特征向量作单位化，即$E$的右奇异向量
+\\还有关系：
+$$\mathbf{v}_i=\sigma_i^{-1}E^T\mathbf{u}_i$$
+$$\mathbf{u}_k=\sigma_k^{-1}E\mathbf{v}_k$$
+当 $\sigma_k=0$ 时：
+\\$\{\mathbf{u}_k\}$ 通过$E^T\mathbf{u}_k=0$作单位化求解
+\\$\{\mathbf{v}_k\}$ 通过$E\mathbf{v}_k=0$并作单位化求解
+按特征值从大到小排序，组装
+\[
+U=\big[\mathbf{u}_1\ \mathbf{u}_2\ \mathbf{u}_3\big]\in\mathrm{O}(3),\qquad
+V=\big[\mathbf{v}_1\ \mathbf{v}_2\ \mathbf{v}_3\big]\in\mathrm{O}(3),\qquad
+\Sigma=\mathrm{diag}(\sigma_1,\sigma_2,\sigma_3).
+\]
+从而得到
+\[
+E \;=\; U\,\Sigma\,V^\top.
+\]
+对理想本质矩阵，$\sigma_1=\sigma_2=\bar{\sigma}>0,\ \sigma_3=0$，必然有一个0奇异值。
+
+\paragraph{(2) 用 $U,V$ 构造四组候选 $(R,t)$}
+令
+\[
+W=\begin{bmatrix}
+0 & -1 & 0\\
+1 & \ \ 0 & 0\\
+0 & \ \ 0 & 1
+\end{bmatrix},
+\qquad
+W^\top=\begin{bmatrix}
+0 & 1 & 0\\
+-1 & 0 & 0\\
+0 & 0 & 1
+\end{bmatrix},
+\qquad
+Z=\begin{bmatrix}
+0 & 1 & 0\\
+-1 & 0 & 0\\
+0 & 0 & 0
+\end{bmatrix}.
+\]
+则有标准分解公式
+\[
+R_1 \;=\; U\,W\,V^\top,\qquad
+R_2 \;=\; U\,W^\top\,V^\top,\qquad
+[t]_\times \;=\; U\,Z\,U^\top.
+\]
+（1）由于2D–2D 的对极几何只能约束“极线/极平面关系”，无法区分围绕基线方向的“+90”和“−90°”那种扭转（$W\text{和}W^T$）两种扭转都会给出满足对极约束的$R$；\\
+（2）由于 $[t]_\times$ 只确定了 $t$ 的方向（尺度不可知），可取
+\[
+t \;\parallel\; U(:,3),\quad \text{即}\quad t=\pm\,U(:,3).
+\]
+于是得到四组候选解
+\[
+(R,t)\ \in\ \big\{(R_1,+t),\ (R_1,-t),\ (R_2,+t),\ (R_2,-t)\big\}.
+\]
+\emph{符号修正：}若出现 $\det(R_i)<0$，则令 $U\leftarrow U\cdot\mathrm{diag}(1,1,-1)$ 或 $V\leftarrow V\cdot\mathrm{diag}(1,1,-1)$，
+随后\emph{重新}构造 $R_i$ 以保证 $R_i\in\mathrm{SO}(3)$（$\det(R_i)=+1$）。
+
+
+        ==============================
         \item \textbf{关于错误匹配与RANSAC优化}
         \begin{enumerate}
-            \item \textbf{问题}：当匹配点数量多于8对时，可能包含错误匹配；
+            \item \textbf{问题}：当匹配点数量多于8对时，可能包含错误匹配，最小二乘估计拟合较差；
             \item \textbf{解决}：采用\textbf{RANSAC（Random Sample Consensus）}算法进行鲁棒估计\footnote{RANSAC通过随机采样与一致性检验，有效剔除误匹配点，提高姿态估计的稳定性。}；
-            \item 判定内点的准则：(1)点到极线的距离在阈值范围内；(2)图像特征射线与极平面之间的夹角在阈值范围内。
-        ==============================\\
+            \item 算法流程如下：
+            \begin{enumerate}
+              \item 随机抽取$s$对匹配点（八点法则$s=8$），用这些样本估计候选$E$。
+              \item 用$E$计算极线，用全体匹配点，逐一计算到这条极线的残差，判断是否为内点
+              \item 判定内点的准则：(1)点到极线的距离在阈值范围内；(2)图像特征射线与极平面之间的夹角在阈值范围内。
+              \item 记录在该$E$下的内点数量，若比之前的多，记录该$E$和该最佳内点集。
+              \item 判断是否继续迭代，继续迭代，用内点率\footnote{经典RANSAC先验固定一个内点率，也可以自适应内点率，用当前最佳内点率$\hat\omega=S/N$动态更新$K_{need}$}计算所需迭代数$K_{need}$，
+              $$K_{need} = \frac{\log(1-p)}{\log(1-w^s)}$$
+              若当前迭代次数小于所需，则继续迭代回到步骤A，否则停止；
+              \item 停止后，用最佳内点集重估 \(E\)，之后回到之前的步骤分解得到4组$R$、$t$等。
+            \end{enumerate}
+            \paragraph{例题：}Q：RANSAC拟合算法，内点70\%，希望得到好样本的概率是99.9\%，K最小值为？\\
+            A：已知内点比例 \(w=0.7\)，需要的最小样本数 \(s=8\)，希望至少一次抽到“全内点样本”的概率为 \(p=0.999\)。一次抽样全为内点的概率为 \(w^s\)，则一次抽到的s个样本全都是内点的概率为：
+            $$\omega^s$$
+            则一次抽到的s个样本存在非内点，即不全都是内点的概率为：
+            $$1-\omega^s$$
+            则K次抽取样本，这K次中没有一次是抽到的都是内点的，即每次都是“不全都是内点”的概率为：
+            $$(1-\omega^s)^K$$
+            则K次抽取样本，至少存在一次抽到了s个样本都是内点的概率为：
+            $$1-(1-\omega^s)^K$$
+            则有：
+            \[
+            1-(1-w^s)^K \ge p\ \Rightarrow\
+            K \ge \frac{\log(1-p)}{\log(1-w^s)}.
+            \]
+            代入 \(w=0.7,\,s=8,\,p=0.999\) 得
+            \[
+            K \ge \frac{\log(0.001)}{\log(1-0.7^8)} \approx 116.34,
+            \]
+            故取最小整数 \(K=117\) 次。
+        \\==============================
         \end{enumerate}
         \end{itemize}
         \end{small}
@@ -657,7 +881,7 @@
                                         \begin{small}\kaishu
                                         \item 实际应用中由于噪声等存在，多条光线几乎不可能汇聚于一点，因此在求解过程中，需要不断对待求信息进行调整（adjustment）。
                                         \end{small}
-                                        \item \textbf{解决办法}：融合多帧信息，建立\textbf{匹配特征点光束约束}，通过\textbf{非线性最优化}求解。
+                                        \item \textbf{解决办法}：融合多帧信息，建立\textbf{匹配特征点光束约束}，通过\textbf{非线性最优化}求解\footnote{每个观测是“从相机光心射出的光束穿过像素点”，所有看到同一 3D 点的光束应交汇在该 3D 点；现实有噪声，交汇不了，BA 就是同时微调所有相机位姿和 3D 点位置，让所有光束最一致，即总代价（重投影误差）最小}。
                                         \item \textbf{求解步骤}：
                                         \begin{figure}[H]
                                             \centering
@@ -678,10 +902,11 @@
                                             \[
                                             \kappa_{ij}
                                             \]
-                                            \item 光束平移法的优化目标函数为：
+                                            \item 光束平移法的优化目标函数\footnote{若某三维特征$j$出现在第$i$帧图像，计算该三维特征在该图像上的位置与该三维特征在该时刻位姿下的图像投影位置，使得二者间距离最小}：
                                             \[
                                             \min \sum_{i=1}^{m} \sum_{j=1}^{N} \kappa_{ij} \left\| \tilde{x}_i^j - \pi(R_i, t_i, X_j) \right\|^2
                                             \]
+                                            其中决策变量是$R_i$、$t_i$。
                                         \end{enumerate}
                                         \end{small}
                                     \end{itemize}

@@ -259,11 +259,13 @@
                             \item 若 $v_0\neq v_1$，则在 $t_f$ 处速度不连续；
                         \end{itemize}
                 \end{enumerate}
+                \textcolor{red}{在情况一下，首末速度、位置约束给出，中间位置给出且要求位置续，共六个约束，解六个未知数；中间点速度不要求连续，但当首末速度给的值相等时，恰好连续。}\\
             ================================   
              \item \textbf{情况二：若要求时间对称，不要求轨迹对称，即$t_f=(t_0+t_1)/2$，$q_f\neq(q_0+q_1)/2$：}
              \\可由以下方程解得$a_1,a_2,a_3,a_4,a_5,a_6$
-            \( \left\{  \begin{array}{l} {\dot{q}}_{a}\left( {t}_{0}\right)  = {a}_{1} = {v}_{0} \\  {\dot{q}}_{a}\left( {t}_{0}\right)  = {a}_{1} = {v}_{0} \\  {q}_{b}\left( {t}_{1}\right)  = {a}_{3} + {a}_{4}\frac{T}{2} + {a}_{5}{\left( \frac{T}{2}\right) }^{2} = {q}_{1} \\  {\dot{q}}_{b}\left( {t}_{1}\right)  = {a}_{4} + 2{a}_{5}\frac{T}{2} = {v}_{1} \\  {q}_{a}\left( {t}_{f}\right)  = {a}_{0} + {a}_{1}\frac{T}{2} + {a}_{2}{\left( \frac{T}{2}\right) }^{2} = {a}_{3} = {q}_{b}\left( t_f\right) \\  {\dot{q}}_{a}\left( {t}_{f}\right)  = {a}_{1} + 2{a}_{2}\frac{T}{2} = {a}_{4} = {\dot{q}}_{b}\left( {t}_{f}\right)  \end{array}\right. \)
-            其中 \( \frac{T}{2} = \left( {{t}_{f} - {t}_{0}}\right)  = \left( {{t}_{1} - {t}_{f}}\right) \)
+            \( \left\{  \begin{array}{l} {{q}}_{a}\left( {t}_{0}\right)  = {a}_{1} = {q}_{0} \\  {\dot{q}}_{a}\left( {t}_{0}\right)  = {a}_{1} = {v}_{0} \\  {q}_{b}\left( {t}_{1}\right)  = {a}_{3} + {a}_{4}\frac{T}{2} + {a}_{5}{\left( \frac{T}{2}\right) }^{2} = {q}_{1} \\  {\dot{q}}_{b}\left( {t}_{1}\right)  = {a}_{4} + 2{a}_{5}\frac{T}{2} = {v}_{1} \\  {q}_{a}\left( {t}_{f}\right)  = {a}_{0} + {a}_{1}\frac{T}{2} + {a}_{2}{\left( \frac{T}{2}\right) }^{2} = {a}_{3} = {q}_{b}\left( t_f\right) \\  {\dot{q}}_{a}\left( {t}_{f}\right)  = {a}_{1} + 2{a}_{2}\frac{T}{2} = {a}_{4} = {\dot{q}}_{b}\left( {t}_{f}\right)  \end{array}\right. \)
+            其中 \( \frac{T}{2} = \left( {{t}_{f} - {t}_{0}}\right)  = \left( {{t}_{1} - {t}_{f}}\right) \)\\
+            \textcolor{red}{在情况二下，首末速度、位置约束给出，中间位置给出且要求位置续、速度连续，共六个约束，解六个未知数。}
             \\================================   
              \item \textbf{情况三：若不要求时间、轨迹对称，即$t_f\neq(t_0+t_1)/2$，$q_f\neq(q_0+q_1)/2$：}             
             \\可由以下方程解得$a_1,a_2,a_3,a_4,a_5,a_6$
@@ -503,7 +505,7 @@
     \item \textbf{图形搜索法}\label{method:graph}
         \begin{itemize}
             \item \textbf{主要思路}：根据路径搜索经过或者近似经过路径点且满足运动学约束的图形曲线
-            \item \textbf{基本思想}：采用\textbf{运动基元}，从起始点开始不断搜索由\textbf{运动基元组合}而成的\textbf{最佳单词}来获得最优轨迹
+            \item \textbf{基本思想}：采用\textbf{运动基元}，从起始点开始不断搜索由\textbf{运动基元组合}而成的\textbf{最佳单词}来获得最优轨迹\\
             \textbf{优点}：
                 \begin{itemize}
                     \item 可以实现\textbf{位置}的连续平滑，并充分考虑了机器人的\textbf{运动学约束}和\textbf{时间最优要求}
