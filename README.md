@@ -1,3 +1,3 @@
 ﻿# Robotics II Review Outline (ZJU CSE)
 
-机器人学2提纲，供复习参考。
+机器人学2提纲，供学习与复习参考。

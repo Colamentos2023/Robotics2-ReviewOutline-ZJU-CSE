@@ -51,7 +51,7 @@
 \subsection{路径规划的基本概念}\label{subsec:pathplanning_basic}
 \begin{enumerate}
     \item \textbf{路径规划}：根据所给定的地图和目标位置，规划一条使机器人到达目标位置的路径。
-    \\{\small\kaishu （只考虑工作空间的几何约束，不考虑机器人的运动学模型和约束可将移动机器人简化为工作空间中的一个点）}
+    \\{\small\kaishu （只考虑工作空间的几何约束，不考虑机器人的运动学模型和约束，将移动机器人简化为工作空间中的一个点）}
     \item \textbf{工作空间与位形空间}：
     \begin{itemize}
         \item \textbf{工作空间}：移动机器人上的参考点能达到的空间集合，机器人采用位置和姿态描述，并需考虑体积。
@@ -68,7 +68,7 @@
     \end{figure}
     \item \textbf{算法}：
         \begin{itemize}
-            \item \textbf{完备性的概念}：当解存在时，能够在有限的时间内找到解。
+            \item \textbf{完备性的概念}：当解存在时，能够在\textbf{有限的时间}内找到解。
             \item \textbf{挑战}：在连续空间内搜索，难以保证时间。
         \end{itemize}
     \item \textbf{路径规划的两个基本问题}：拓扑连通图、最优路径搜索
@@ -162,7 +162,7 @@
                     \item \( h(n) \)：为从结点 \( n \) 到目标点的最佳路径估计代价。
                 \end{itemize}
             \end{itemize}
-        \item \textbf{路径成本的计算（$h(n)$的选取）}：欧氏距离或曼哈顿距离，当$h(n)$可采纳时最优。
+        \item \textbf{路径成本的计算（$h(n)$的选取）}：欧氏距离或曼哈顿距离，当$h(n)$可采纳\footnote{即$h)(n)<\text{真实最小距离}h^*(n)$，此时可采用，一定能找到最优解；否则将过分估计，不一定找到最优解。换言之，可采用的$h(n)$总是乐观的。}时最优。
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.3\textwidth]{images/hn.png}
@@ -193,9 +193,9 @@
         BFS & 1 & 1 & 1 & 0 & 无启发，按层搜索\\
         DFS & 0 & 0 & 1 & 0 & 无启发，按深搜索\\
         Dijkstra & 1 & 1 & 1 & 0 & 仅考虑实际代价$g(n)$\\
-        A*算法 & 1 & 1$^\ast$ & 1 & 1 & 综合代价与启发式：$f=ag+bh$\\
+        A*算法 & 1 & 1$^\ast$ & 1 & 1 & 综合代价与启发式：$f=g+h$\\
         贪心算法 & 0 & 0 & 0 & 1 & 仅考虑启发函数$h(n)$\\
-        可调贪婪算法 & 0$\sim$1 & 0$\sim$1 & $a\in[0,1)$ & $b\in(0,1]$ & 权重可调，折中策略\\
+        可调贪婪算法 & 0$\sim$1 & 0$\sim$1 & $a\in[0,1)$ & $b\in(0,1]$ & $f=g+\epsilon h$\\
         \bottomrule
     \end{tabular}
         \caption{基于$f = a g + b h$的路径搜索算法比较（$^\ast$ 当$h(n)$可采纳时最优）}
@@ -250,11 +250,6 @@
                             \item 路径长度：比可视图法更长
                             \item 适用性：不适用于短距离定位传感器
                         \end{itemize}
-                    \item \textbf{解决办法}：
-                        \begin{itemize}
-                            \item 膨胀：以远大于机器人半径的尺寸膨胀障碍物，但容易造成可行路径的消失
-                            \item 距离：在路径规划后修改所得路径，使其与障碍物保持一定的距离
-                        \end{itemize}
                 \end{itemize}
         \end{enumerate}
     \item \textbf{单元分解法}\label{item:res:cell}
@@ -302,12 +297,11 @@
                     \item \textbf{典型方法}：栅格表示法——将环境分解成若干个大小相同的栅格。
                     \item \textbf{优点}：
                         \begin{itemize}
-                            \item 机器人不需要考虑它在每个空闲单元中的具体位置，只需要考虑如何从一个单元移动到相邻的空闲单元
-                            \item 单元数与环境大小无关
+                            \item 非常简单，与环境的疏密和物体形状的复杂度无关
                         \end{itemize}
                     \item \textbf{缺点}：
                         \begin{itemize}
-                            \item 计算：计算效率极大地依赖于环境中物体的复杂度
+                            \item 存储：对存储空间有要求
                         \end{itemize}
                 \end{itemize}      
             \item \textbf{可变大小的近似单元分解}\label{item:res:cell:var}
@@ -480,6 +474,16 @@
                     \item 考虑机器人的运动执行能力
                     \item 通过树结构可以直接回溯得到路径
                 \end{enumerate}
+            \item \textbf{基本流程}
+                {\small\kaishu{
+                \begin{enumerate}
+                    \item 在可行空间随机采样
+                    \item 找到当前树中离采样点最近的树节点
+                    \item 从最近的树节点“生长”出新的节点和树枝(路径)
+                    \item 如果此路径没有和环境发生碰撞，则将此节点和路径加到树中
+                    \item 重复n次采样，直到树生长到终点区域
+                \end{enumerate}
+                }}
             \item \textbf{影响规划收敛速度的三个步骤}
                 \begin{itemize}
                     \item sample:随机状态的采样
@@ -535,6 +539,17 @@
                 \label{fig:rrts_process}
             \end{figure}
     \textcolor{red}{注意：PRM不考虑机器人的执行性，RRT考虑！}
+    \begin{center}
+    \begin{tabular}{ccc}
+      \toprule
+      \textbf{算法} & \textbf{概率完备性} & \textbf{渐进最优性} \\
+      \midrule
+      PRM  & 1 & 0 \\
+      RRT  & 1 & 0 \\
+      RRT* & 1 & 1 \\
+      \bottomrule
+    \end{tabular}
+    \end{center}
     \end{enumerate}
 
 \subsection{路径规划近期研究}\label{subsec:recent_research}
@@ -551,7 +566,8 @@
     \item \textbf{SOCIAL行为路径规划}\label{item:recent:social}
 \end{itemize}
 
-\subsection*{本章小节}
+
+\subsection*{本章小结}
 \begin{table}[H]
     \centering
     \small

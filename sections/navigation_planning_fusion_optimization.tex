@@ -69,7 +69,7 @@
                     \end{figure}
             \item \textbf{面临问题}：
                 \begin{itemize}
-                    \item \textbf{离散→连续}路径为一系列离散点表示，弹性带算法必须根据这些点生成一条连续的曲线
+                    \item \textbf{离散→连续}：路径为一系列离散点表示，弹性带算法必须根据这些点生成一条连续的曲线
                     \item \textbf{无碰检测}：所生成的连续曲线必须是安全无碰的，而曲线无碰检测是一件耗时的工作。
                 \end{itemize}
                     \begin{figure}[H]
@@ -78,7 +78,7 @@
                         \caption{弹性带算法+气泡示意图}
                     \end{figure}
             \item \textbf{解决方案}：\textbf{气泡BUBBLE}:采用\textbf{气泡集合}来\textbf{近似}表示规划路径附近的自由空间，而不是计算表达整个自由空间\\
-                \small\kaishu{
+                {\small\kaishu{
                 \begin{itemize}
                     \item 每一个气泡是自由空间的一个子集，以路径点为中心，以该路径点与最近障碍物之间的安全距离为半径
                     \item 路径表示为一系列路径点和由路径点长成的气泡，只要相邻气泡有一定的相互覆盖，就能确保该路径是安全的
@@ -166,7 +166,7 @@
                         \caption{基于气泡的动态避障和路径平滑}
                     \end{figure}
 
-            \item \textbf{优点}：
+}            \item \textbf{优点}：
                 \begin{itemize}
                     \item 可实现路径平滑，解决路径存在方向突变问题，便于机器人执行
                     \item 可避免避障后偏离原路径而失去到达目标点的全局信息
@@ -233,6 +233,11 @@
      f(B)=\sum\nolimits_{k}\,N\,\gamma_k\,f_k(B),
   \]
   其中 $\gamma_k$ 为权重，$N$ 为尺度/归一化因子，$f_k(\cdot)$ 为各个目标或约束对应的代价。
+  \begin{enumerate}
+      \item 路径最短或时间最快
+      \item 运动学动力学约束
+      \item 远离障碍物目标
+  \end{enumerate}
 
   \item \textbf{各项目标/约束建模}\,:  
   \begin{itemize}
@@ -301,7 +306,7 @@
   \end{itemize}
 
   \item \textbf{求解与实现}\,:\\
-  将 $\{\mathbf{x}_i\}$ 与 $\{\Delta T_i\}$ 作为图（超图\footnote{由节点和边组成，其中一条边所能连接的节点数量不受限制，可以连接两个以上的节点}）中的顶点，各项 $f_k$ 作为边/超边代价。由于大多数代价仅与局部相邻节点与时间间隔相关，问题具有\emph{稀疏性}，可用图优化框架（如 \texttt{g2o}\footnote{常用的大规模稀疏非线性最小二乘求解器。}）迭代求解，迭代过程中还可根据轨迹长度\emph{动态插入/删除}位姿节点以匹配时空分辨率。
+  将 $\{\mathbf{x}_i\}$ 与 $\{\Delta T_i\}$ 作为图（超图\footnote{由节点和边组成，其中一条边所能连接的节点数量不受限制，可以连接两个以上的节点}）中的顶点，各项 $f_k$ 作为边/超边代价。由于大多数代价\textcolor{red}{仅与局部相邻节点与时间间隔相关}，问题具有\textcolor{red}{稀疏性}，可用\textcolor{red}{图优化}框架（如 \texttt{g2o}\footnote{常用的大规模稀疏非线性最小二乘求解器。}）迭代求解，迭代过程中还可根据轨迹长度\emph{动态插入/删除}位姿节点以匹配时空分辨率。
 \end{enumerate}
 }
         \end{itemize}

@@ -77,7 +77,7 @@
                             \item 效率：采用贪婪搜索策略，某些情况下移动低效
                         \end{itemize}
                 \end{itemize}
-                \begin{figure}[htbp]
+                \begin{figure}[H]
                     \centering
                     \includegraphics[width=0.35\textwidth]{images/bug2bad.png}
                     \includegraphics[width=0.35\textwidth]{images/bug2bad2.png}
@@ -157,7 +157,7 @@
             \caption{DWA算法示意图}
         \end{figure}
         \begin{itemize}
-            \item \textbf{基本思想}：在速度空间中搜索适当的平移速度和旋转速度指令$(v,\omega)$\footnote
+            \item \textbf{基本思想}：在速度空间中搜索适当的平移速度和旋转速度指令$(v,\omega)$
             \item \textbf{搜索空间}：速度空间\footnote{之前的方法是几何空间搜索，这里转化为了速度空间搜索}
             \item \textbf{实现步骤}：
                 \begin{enumerate}
@@ -166,8 +166,8 @@
                             \item {\small\kaishu 在速度控制模型下，机器人在$\Delta t$时间间隔内若线速度$v$与角速度$\omega$保持不变，则位置变化为：}
                             \[
                             \begin{cases}
-                            x' = x - \frac{v}{\omega}\sin(\theta) + \frac{v}{\omega}\sin(\theta + \omega \Delta t) \\
-                            y' = y + \frac{v}{\omega}\cos(\theta) - \frac{v}{\omega}\cos(\theta + \omega \Delta t) \\
+                            x' = x - \frac{v}{\omega}\sin\theta + \frac{v}{\omega}\sin(\theta + \omega \Delta t) \\
+                            y' = y + \frac{v}{\omega}\cos\theta - \frac{v}{\omega}\cos(\theta + \omega \Delta t) \\
                             \theta' = \theta + \omega \Delta t
                             \end{cases}
                             \]
@@ -194,7 +194,7 @@
                             \item {\small\kaishu 该集合反映了机器人在$\Delta t$时间内可通过加减速达到的速度范围。}
                         \end{itemize}
                 
-                    \item 结合机器人速度约束，获得可行速度空间为
+                    \item 结合机器人\textbf{速度约束}，获得可行速度空间为
                         \begin{itemize}
                             \item {\small\kaishu 结合机器人结构及电机极限，定义最大允许速度范围：}
                             \[
@@ -248,11 +248,11 @@
         \makecell[{{p{5.5cm}}}]{路径与目标对齐量 \\ 新方向和机器人方向的差异量 \\ 原来选择方向和新方向之间的差异量} &
         \makecell[{{p{5.5cm}}}]{朝向目标点 \\ 远离障碍物 \\ 速度最大化} \\
         \midrule
-        是否需要归一化 & 否\footnote{三个量都是角度量，因此不需要做归一化} & 是 \\
+        是否需要归一化 & 否 & 是 \\
         \bottomrule
     \end{tabular}
     \caption{VFH与DWA在目标函数上的对比}
-\end{table}
+\end{table}\footnote{向量势直方图三个量都是角度量，因此不需要做归一化}
 
 
     \end{enumerate}
