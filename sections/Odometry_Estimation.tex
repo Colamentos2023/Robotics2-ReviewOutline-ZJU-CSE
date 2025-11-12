@@ -569,7 +569,9 @@ t=\bar q - R\,\bar p=(-1,\,1)^{\top}.
                                 \begin{itemize}
                                     \item \textbf{关键点}：\textbf{Oriented FAST} 
                                         \begin{itemize}
-                                            \item \textbf{角点}\footnote{角点（corner） 是一种特定类型的特征点（feature point）；而关键点（keypoint） 是在角点基础上进一步赋予了尺度、方向等属性的“可匹配特征点”。关键点是特征点的真子集，角点是关键点的一种}：局部像素灰度变化明显的像素。
+                                            \item \textbf{角点}\footnote{角点（corner） 是一种特定类型的特征点（feature point）；而关键点（keypoint） 是在角点基础上进一步赋予了尺度、方向等属性的“可匹配特征点”。关键点是特征点的真子集，角点是关键点的一种}：局部像素灰度变化明显的像素。角点是指图像中局部灰度变化非常剧烈的点，通常用于定位和跟踪。角点仅仅是一个特征位置，是图像中变化明显的地方，代表了图像中的结构信息。
+
+                                            ORB（Oriented FAST and Rotated BRIEF）是一种特征提取算法，不仅仅关心特征的位置，还包括特征的方向和描述符，它结合了FAST角点检测器和BRIEF描述符，并引入了对角点的旋转不变性。因此，ORB不仅在图像中检测角点，还会计算每个角点的描述符，使得其在不同视角下仍能保持一致。
                                             \item \textbf{角点获取方法}：
                                                 \begin{figure}[H]
                                                     \centering

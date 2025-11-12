@@ -491,6 +491,8 @@
                     \item collision:新生成节点的防碰检测
                 \end{itemize}
         \end{itemize}
+            \item \textbf{优点}：致力于找到从起点到终点的路径，相比PRM更具目标导向性劣势\\
+            \item \textbf{缺点}：产生的路径非最优不够高效
         \begin{enumerate}
             \item \textbf{RRT改进算法1}\label{item:prob:rrt:improv1}
                 \begin{itemize}
@@ -538,7 +540,6 @@
                 \caption{RRT*算法优化流程可视化}
                 \label{fig:rrts_process}
             \end{figure}
-    \textcolor{red}{注意：PRM不考虑机器人的执行性，RRT考虑！}
     \begin{center}
     \begin{tabular}{ccc}
       \toprule
@@ -582,4 +583,9 @@
     \caption{分辨率完备与概率完备方法比较}
     \label{tab:resolution_vs_probabilistic}
 \end{table}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/bijiao.png}
+    \caption{PRM、RRT的概率完备性如何实现}
+\end{figure}
 \end{document}

@@ -475,9 +475,9 @@
         \toprule
         方法 & 位置曲线最高次幂 & 速度是否连续 & 加速度是否连续 & 加加速度是否连续 \\
         \midrule
-        抛物线轨迹 & 2 & ×$^\ast$ & × & × \\
-        梯形速度轨迹 & 2 & √ & × & × \\
-        双S速度曲线 & 3 & √ & √ & × \\
+        抛物线轨迹 & 2 & 0$^\ast$ & 0 & 0 \\
+        梯形速度轨迹 & 2 & √ & 0 & 0 \\
+        双S速度曲线 & 3 & √ & √ & 0 \\
         \bottomrule
         \end{tabular}
         \end{table}
@@ -811,5 +811,18 @@
 
                         \end{itemize}
             \end{enumerate}
-
+\textbf{小结}：
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{方法} & \textbf{控制量} & \textbf{搜索空间是否连续} & \textbf{是否全局最优} & \textbf{速度是否平滑} & \textbf{典型应用场景} \\
+\midrule
+图形搜索法   & $x,y$      & 0 & 1 & 0 & 非完整车最短路、泊车/换道 \\
+参数优化法   & $v,\omega$ & 1 & 0 & 1 & 平滑跟踪、时间/能量最优 \\
+反馈控制法   & $v,\omega$ & 1 & 0 & 0 & 实时纠偏、停靠对接、局部避障 \\
+\bottomrule
+\end{tabular}
+\end{table}
 \end{document}
