@@ -1,0 +1,415 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+\section{四旋翼无人机动力学建模}
+\subsection{动力学模型}
+\begin{enumerate}
+    \item \textbf{坐标系变换与旋转矩阵基础}\footnote{考虑到本部分同学们已经在《机器人学I》课程中学习过，此处仅做简要整理}
+    \[
+    \mathbf{v}^3 =
+    \underbrace{%
+    \begin{bmatrix}
+    1 & 0 & 0\\[4pt]
+    0 & \cos\phi & \sin\phi\\[4pt]
+    0 & -\sin\phi & \cos\phi
+    \end{bmatrix}
+    \begin{bmatrix}
+    \cos\theta & 0 & -\sin\theta\\[4pt]
+    0 & 1 & 0\\[4pt]
+    \sin\theta & 0 & \cos\theta
+    \end{bmatrix}
+    \begin{bmatrix}
+    \cos\psi & \sin\psi & 0\\[4pt]
+    -\sin\psi & \cos\psi & 0\\[4pt]
+    0 & 0 & 1
+    \end{bmatrix}%
+    }_{\mathbf{R}_0^3}
+    \;
+    \underbrace{\begin{bmatrix}\alpha\\[4pt]\beta\\[4pt]\gamma\end{bmatrix}}_{\mathbf{v}^0}
+    \]
+    
+    \begin{itemize}
+      \item 不同坐标系可通过三次旋转达到重合。
+      \item 三次旋转的顺序可以不同，但机器人领域中默认旋转顺序为 Z–Y–X。
+      \item Z–Y–X 旋转顺序对应的角称为欧拉角，记为 $\psi,\;\theta,\;\phi$。
+      \item 欧拉角确定以后，旋转矩阵 $\mathbf{R}$ 也唯一确定。
+      \item 旋转矩阵确定后，向量在不同坐标系下的坐标可以通过该旋转矩阵进行变换。
+      \item 对换性质：$\mathbf{R}_1^2=\mathbf{R}_2^{1^T}=\mathbf{R}_2^{1^{-1}}$。
+    \end{itemize}
+
+    \item \textbf{四旋翼无人机的坐标系、状态定义}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/drone.png}
+        \caption{四旋翼无人机建模}
+    \end{figure}
+    \begin{itemize}
+      \item \textbf{坐标系}：
+      \begin{itemize}
+        \item 北东下\footnote{在《空中机器人》课程中，该坐标系也叫“北东地”坐标系}坐标系（NED）
+        \item 机体坐标系（Body）
+      \end{itemize}
+    
+      \item \textbf{状态}\footnote{共12个}：
+      \begin{itemize}
+        \item 位置：$\mathbf{p}$
+        \item 速度：$\mathbf{v}$
+        \item 姿态/欧拉角：$\Phi=\begin{bmatrix}\phi\\[4pt]\theta\\[4pt]\psi\end{bmatrix}$
+        \item 角速率：$p,\;q,\;r$
+      \end{itemize}
+    
+      \item \textbf{输入}：
+      \begin{itemize}
+        \item 螺旋桨转速 $\omega_i$\footnote{由转速能确定三轴的力矩，来改变无人机的位姿}
+      \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{四旋翼无人机动力学建模}\\
+    {\small\kaishu{
+    \noindent\textbf{位置与速度关系:}
+\[
+\dot{\mathbf{p}}=\mathbf{v}
+\qquad
+\begin{bmatrix}\dot{x}^E\\[4pt]\dot{y}^E\\[4pt]\dot{z}^E\end{bmatrix}
+=
+\begin{bmatrix}v_x^E\\[4pt]v_y^E\\[4pt]v_z^E\end{bmatrix}
+\]
+
+\bigskip
+\noindent\textbf{速度与加速度／受力关系:}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\linewidth]{images/drone1.png}
+        \caption{受力关系}
+    \end{figure}
+\[
+\dot{\mathbf{v}}=\mathbf{g}+\mathbf{T}+\mathbf{D}
+\]
+\[
+\begin{bmatrix}\dot{v}_x^E\\[4pt]\dot{v}_y^E\\[4pt]\dot{v}_z^E\end{bmatrix}
+=
+\begin{bmatrix}0\\[4pt]0\\[4pt]g\end{bmatrix}
++
+\mathbf{R}_B^E(\phi,\theta,\psi)
+\begin{bmatrix}0\\[4pt]0\\[4pt]T\end{bmatrix}
++
+\mathbf{D}\big(v,\phi,\theta,p,q,r,\dots\big)
+\]
+
+\bigskip
+\noindent\textbf{中间量（分步旋转）:}
+\[
+\boldsymbol{\Omega}^1
+=
+\begin{bmatrix}
+\cos\psi & \sin\psi & 0\\[4pt]
+-\sin\psi & \cos\psi & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}0\\[4pt]0\\[4pt]\dot{\psi}\end{bmatrix}
+=
+\begin{bmatrix}0\\[4pt]0\\[4pt]\dot{\psi}\end{bmatrix}
+\]
+\[
+\boldsymbol{\Omega}^2
+=
+\begin{bmatrix}
+\cos\theta & 0 & -\sin\theta\\[4pt]
+0 & 1 & 0\\[4pt]
+\sin\theta & 0 & \cos\theta
+\end{bmatrix}
+\Bigg(\begin{bmatrix}0\\[4pt]0\\[4pt]\dot{\psi}\end{bmatrix}
++
+\begin{bmatrix}0\\[4pt]\dot{\theta}\\[4pt]0\end{bmatrix}\Bigg)
+=
+\begin{bmatrix}-\dot{\psi}\sin\theta\\[4pt]\dot{\theta}\\[4pt]\dot{\psi}\cos\theta\end{bmatrix}
+\]
+\[
+\boldsymbol{\Omega}^B
+=
+\begin{bmatrix}
+1 & 0 & 0\\[4pt]
+0 & \cos\phi & \sin\phi\\[4pt]
+0 & -\sin\phi & \cos\phi
+\end{bmatrix}
+\Bigg(\boldsymbol{\Omega}^2
++
+\begin{bmatrix}\dot{\phi}\\[4pt]0\\[4pt]0\end{bmatrix}\Bigg)
+=
+\begin{bmatrix}
+-\dot{\psi}\sin\theta + \dot{\phi}\\[6pt]
+\dot{\theta}\cos\phi + \dot{\psi}\cos\theta\sin\phi\\[6pt]
+\dot{\psi}\cos\theta\cos\phi - \dot{\theta}\sin\phi
+\end{bmatrix}
+\]
+
+\bigskip
+\noindent
+$$\displaystyle
+\begin{bmatrix}\dot{\phi}\\[4pt]\dot{\theta}\\[4pt]\dot{\psi}\end{bmatrix}
+\neq
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+\quad(\text{注意})
+$$
+
+\bigskip
+\noindent\textbf{欧拉角与角速率关系:}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\linewidth]{images/51.png}
+    \caption{欧拉角与角速率关系}
+\end{figure}
+\[
+\begin{bmatrix}\dot{\phi}\\[6pt]\dot{\theta}\\[6pt]\dot{\psi}\end{bmatrix}
+=
+\begin{bmatrix}
+1 & \tan\theta\sin\phi & \tan\theta\cos\phi\\[6pt]
+0 & \cos\phi & -\sin\phi\\[6pt]
+0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
+\end{bmatrix}
+\begin{bmatrix}p\\[6pt]q\\[6pt]r\end{bmatrix}
+\]
+
+\bigskip
+\noindent\textbf{角加速度与力矩关系:}
+\[
+\begin{bmatrix}\dot{p}\\[6pt]\dot{q}\\[6pt]\dot{r}\end{bmatrix}
+=
+\big(\mathbf{I}^B\big)^{-1}
+\left(\begin{bmatrix}L\\[4pt]M\\[4pt]N\end{bmatrix}^B
+-
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+\times
+\mathbf{I}^B
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}\right)
+\]
+}}
+\bigskip
+\noindent\textbf{汇总:}
+\[
+\begin{cases}
+\dot{\mathbf{p}}=\mathbf{v},\\[6pt]
+\dot{\mathbf{v}}=
+\begin{bmatrix}0\\[4pt]0\\[4pt]g\end{bmatrix}
++
+\mathbf{R}_B^E(\phi,\theta,\psi)
+\begin{bmatrix}0\\[4pt]0\\[4pt]T\end{bmatrix}
++\mathbf{D}(\cdot),\\[8pt]
+\begin{bmatrix}\dot{\phi}\\[4pt]\dot{\theta}\\[4pt]\dot{\psi}\end{bmatrix}
+=
+\begin{bmatrix}
+1 & \tan\theta\sin\phi & \tan\theta\cos\phi\\[6pt]
+0 & \cos\phi & -\sin\phi\\[6pt]
+0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
+\end{bmatrix}
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix},\\[8pt]
+\begin{bmatrix}\dot{p}\\[4pt]\dot{q}\\[4pt]\dot{r}\end{bmatrix}
+=
+\big(\mathbf{I}^B\big)^{-1}
+\left(\begin{bmatrix}L\\[4pt]M\\[4pt]N\end{bmatrix}^B
+-
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+\times
+\mathbf{I}^B
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}\right),
+\end{cases}
+\]
+
+\end{enumerate}
+
+\subsection{飞行控制}
+\begin{enumerate}
+    \item \textbf{解耦}
+
+$$
+\begin{bmatrix}\dot{\phi}\\[4pt]\dot{\theta}\\[4pt]\dot{\psi}\end{bmatrix}
+=
+\begin{bmatrix}
+1 & \tan\theta\sin\phi & \tan\theta\cos\phi\\[6pt]
+0 & \cos\phi & -\sin\phi\\[6pt]
+0 & \dfrac{\sin\phi}{\cos\theta} & \dfrac{\cos\phi}{\cos\theta}
+\end{bmatrix}
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+$$
+
+$$
+\begin{bmatrix}\dot{p}\\[4pt]\dot{q}\\[4pt]\dot{r}\end{bmatrix}
+=
+\big(\mathbf{I}^B\big)^{-1}
+\left(
+\begin{bmatrix}L\\[4pt]M\\[4pt]N\end{bmatrix}^B
+-
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+\times
+\mathbf{I}^B
+\begin{bmatrix}p\\[4pt]q\\[4pt]r\end{bmatrix}
+\right)
+$$
+不难发现，这仍然是一个多输入多输出问题，角速度耦合在一起，为了变成SISO系统，我们强行将其他角速度置零，即认为无人机只进行Roll、Yaw、Pitch中的一个，例如：
+$$
+\phi=0,\quad \psi=0,\quad p=0,\quad r=0,\quad L=0,\quad N=0
+$$
+最终得到：
+$$
+\begin{cases}
+\dot{\theta}=q,\\[6pt]
+\dot{q}=\dfrac{M}{I_{yy}},
+\end{cases}
+$$
+同理也可以得到：
+$$
+\begin{cases}
+\dot{\phi}=p,\\[6pt]
+\dot{p}=\dfrac{L}{I_{xx}},
+\end{cases}
+\qquad
+\begin{cases}
+\dot{\psi}=r,\\[6pt]
+\dot{r}=\dfrac{N}{I_{zz}}.
+\end{cases}
+$$
+这样就形成了独立、单入单出（SISO）的线性系统，方便进一步控制。
+\item \textbf{四旋翼俯仰角速率控制器}\\
+
+以无人机只进行俯仰为例，即：
+$$
+\begin{cases}
+\dot{\theta}=q,\\[6pt]
+\dot{q}=\dfrac{M}{I_{yy}},
+\end{cases}
+$$
+在此基础上加一个反馈，构建如下图所示的控制律：
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/52.png}
+    \caption{俯仰速率控制}
+\end{figure}
+因为$I_{yy}$是一个很小的量，因此
+$$\frac{q(s)}{q_{r}(s)}=\frac{K_{p}}{I_{yy}s+K_{p}}\approx1$$
+意味着我们的$q$可以紧紧跟上$q_r$，几乎是要多少角速率有多少角速率；其中$K_p$越大，响应越快。
+
+\item \textbf{四旋翼俯仰姿态控制器}\\
+在上一小节的基础上，如果希望对角度$\theta$也进行控制，我们只需要加一个积分器：
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/53.png}
+    \caption{添加一个积分器}
+\end{figure}
+最终，我们形成：
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{images/54.png}
+    \caption{姿态控制器/串级控制器}
+\end{figure}
+$$G(s)=\frac{K_{p1}K_{p2}}{I_{yy}s^{2}+K_{p1}s+K_{p1}K_{p2}}$$
+其中：
+\begin{itemize}
+    \item 外环控制器计算需要多少\textbf{角速率}来跟踪\textbf{姿态指令}
+    \item 内环控制器计算需要多少\textbf{力矩}来跟踪\textbf{角速率指令}
+\end{itemize}
+{\small\kaishu{
+Q:为什么不直接用PD控制器？\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{images/control4.png}
+    \caption{PD控制器}
+\end{figure}
+$$G(s) = \frac{K_p + K_ds}{I_{yy}s^2 + K_ds + K_p}$$
+看起来虽然也是一个带阻尼的二阶系统，数学上也可行，但是工程角度考虑，真实世界中的传感器是带噪声的
+$$ {K}_{d}\frac{y\left( k\right)  - y\left( {k - 1}\right) }{T} $$
+再如上做差分，误差会被疯狂放大！
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/a.png}
+    \caption{静止状态下加速度计读数}
+\end{figure}
+
+
+Q:为什么不直接用P控制器？\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/55.png}
+    \caption{滑块例子}
+\end{figure}
+地面光滑，滑块运动，希望停止在红线位置。\\
+如图，如果采用上面的框图，一开始滑块距离很远，此时$x$差较大，加速度一直为正数，速度越来越快，这样到了红线以后还会过冲，之后一直这样反复，开始振荡，就是不能停在红线处；\\
+但是采用下面的框图，通过加一个内环，外环控制器会提前给一个希望的参考速度，实现“提前刹车”的作用。
+
+补充内容：从自控知识的角度理解：
+\[
+\dot{x}=v,\qquad \dot{v}=a\;(=u),\qquad e:=x_r-x
+\]
+
+\textbf{(1) 位置P直控加速度}
+\[
+a=K_p e
+\]
+\[
+\dot{e}=-v,\qquad \ddot{e}=-\dot{v}=-a=-K_p e
+\Rightarrow \boxed{\;\ddot{e}+K_p e=0\;}
+\]
+\[
+s^2+K_p=0 \;\Rightarrow\; s=\pm j\sqrt{K_p}
+\]
+极点是两个纯虚根，即阻尼比为0，等幅振荡
+
+\medskip
+\textbf{(2) 位置外环 + 速度内环（等效PD）}
+\[
+v_r=K_{p2} e,\qquad a=K_{p1}\,(v_r-v)
+   =K_{p1}K_{p2}e-K_{p1}v
+\]
+\[
+\dot{e}=-v,\qquad 
+\ddot{e}=-\dot{v}=-a
+      =-K_{p1}K_{p2}e+K_{p1}v
+      =-K_{p1}K_{p2}e-K_{p1}\dot{e}
+\]
+\[
+\Rightarrow \boxed{\;\ddot{e}+K_{p1}\dot{e}+K_{p1}K_{p2}e=0\;}
+\]
+与标准二阶系统 \(s^2+2\zeta\omega_n s+\omega_n^2=0\) 对比：
+\[
+\omega_n=\sqrt{K_{p1}K_{p2}},\qquad
+\zeta=\frac{K_{p1}}{2\sqrt{K_{p1}K_{p2}}}
+     =\frac{1}{2}\sqrt{\frac{K_{p1}}{K_{p2}}}
+\]
+\[
+\text{过阻尼条件： }\boxed{\;\zeta\ge 1\iff \dfrac{K_{p1}}{K_{p2}}\ge 4\;}
+\]
+\textit{等效PD： } \(a=k_p e-k_d \dot{x}\) ，其中 \(k_p=K_{p1}K_{p2},\;k_d=K_{p1}\)。
+\textit{整定要点：} 令内环快于外环（\(K_{p1}\gg K_{p2}\)）以获得足够阻尼并提前“刹车”。
+
+}}
+
+\item \textbf{速度、位置控制}\\
+根据
+$$\begin{bmatrix} \dot{x}^{E} \\ \dot{y}^{E} \\ \dot{z}^{E} \end{bmatrix} = \begin{bmatrix} v_{x}^{E} \\ v_{y}^{E} \\ v_{y}^{E} \end{bmatrix}$$
+$$
+\begin{bmatrix} \dot{v}_{x}^{E} \\ \dot{v}_{y}^{E} \\ \dot{v}_{z}^{E} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ g \end{bmatrix} + R_{B}^{E}(\phi,\theta,\psi)\begin{bmatrix} 0 \\ 0 \\ T \end{bmatrix} + \boldsymbol{D}$$
+可以进一步完善控制框图：
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/control6.png}
+    \caption{引入速度和位置控制的无人机控制框图}
+\end{figure}
+\end{enumerate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{images/56.png}
+    \caption{无人机控制回路总结}
+\end{figure}
+
+\subsection{仿真技术}
+\begin{enumerate}
+    \item \textbf{数值积分}：\\
+    \( \dot{x} = f\left( {x,u}\right) \)\\
+\( {x}_{k + 1} = {x}_{k} + {\Delta t}f\left( {x}_{k},{u}_{k}\right) \)
+    \item \textbf{无人机算法架构}：
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{images/drone2.png}
+        \caption{无人机算法架构}
+    \end{figure}
+    \item \textbf{常用仿真软件}：Gazebo、AirSim等
+\end{enumerate}
+\end{document}

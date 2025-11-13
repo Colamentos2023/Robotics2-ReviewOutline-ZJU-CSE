@@ -1,0 +1,55 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+\section{绪论}
+\subsection{智能移动技术}
+\begin{enumerate}
+    \item \textbf{应用与发展历史}：略。
+    \item \textbf{发展演变}：无智能→弱智能→智能
+    \item \textbf{面临挑战}：环境的复杂性、动态性和开放性\footnote{无基础设施（GPS、导引标识等）下长期鲁棒高效精确的自主移动}。
+    \item \textbf{三个关键问题}：
+        \begin{itemize}
+            \item Where am I?
+            \item Where am I going?
+            \item How do I get there?
+        \end{itemize}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.7\linewidth]{images/main.png}
+            \caption{主要研究内容}
+        \end{figure}
+\end{enumerate}
+\subsection{定位导航方式}
+\begin{enumerate}
+    \item 有人工标识导引且路径固定
+    \begin{itemize}
+        \item \textbf{举例}：磁条导航、磁感应线导航、磁钉导航、二维码导航
+        \item \textbf{优点}：技术成熟、稳定可靠、价格优惠
+        \item \textbf{缺点}：需要施工和维护，路线无法调整
+    \end{itemize}
+    \item 有人工标识导引、无固定路径
+    \begin{itemize}
+        \item \textbf{举例}：激光反射板导引
+        \item \textbf{优点}：技术成熟、路径可调
+        \item \textbf{缺点}：需要施工和维护、价格昂贵
+    \end{itemize}
+    \item 无人工标识导引、无固定路径
+    \begin{itemize}
+        \item \textbf{举例}：自然导航
+        \item \textbf{优点}：无需施工、路径可调、连续定位、室内外通用
+        \item \textbf{缺点}：算法复杂，环境变化影响定位可靠性和稳定性
+    \end{itemize}
+\end{enumerate}
+\subsection{自主移动机器人的一般架构}
+    感知-决策-执行：
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\linewidth]{images/automove_struct.png}
+        \caption{自主移动机器人的一般架构}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\linewidth]{images/zuobiao.png}
+        \caption{必须建立的坐标系概念}
+        \label{fig:placeholder}
+    \end{figure}
+\end{document}
