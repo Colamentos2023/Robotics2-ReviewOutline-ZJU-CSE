@@ -622,7 +622,7 @@ t=\bar q - R\,\bar p=(-1,\,1)^{\top}.
                             \noindent\textbullet\quad \textbf{极线约束}：根据立体视觉
                                 \begin{itemize}
                                     \item \textbf{特征点}：\textcolor{red}{不}需要具备\textbf{三维空间位置}信息，特征非三维。
-                                    \item \textbf{适用性}：适用于\textbf{运动偏移量较小、图像变化较小}的情况；
+                                    \item \textbf{适用性}：适用于\textbf{运动模型一致，但特征非三维}的情况；
                                 \end{itemize}
                                                 \begin{figure}[H]
                                                     \centering
@@ -746,7 +746,7 @@ $$\mathbf{v}_i=\sigma_i^{-1}E^T\mathbf{u}_i$$
 $$\mathbf{u}_k=\sigma_k^{-1}E\mathbf{v}_k$$
 当 $\sigma_k=0$ 时：
 \\$\{\mathbf{u}_k\}$ 通过$E^T\mathbf{u}_k=0$作单位化求解
-\\$\{\mathbf{v}_k\}$ 通过$E\mathbf{v}_k=0$并作单位化求解
+\\$\{\mathbf{v}_k\}$ 通过$E\mathbf{v}_k=0$并作单位化求解\\
 按特征值从大到小排序，组装
 \[
 U=\big[\mathbf{u}_1\ \mathbf{u}_2\ \mathbf{u}_3\big]\in\mathrm{O}(3),\qquad
@@ -854,7 +854,7 @@ t \;\parallel\; U(:,3),\quad \text{即}\quad t=\pm\,U(:,3).
                 \item 采用6个点对的\textbf{DLT（Direct Linear Transform）}方法；
                 \item 采用3个点对的\textbf{P3P方法（Perspective-3-Point）}——求解投影点a, b, c在相机坐标系下的\textbf{三维坐标}，把问题转化为一个\textbf{3D到3D}的位姿估计问题\footnote{通过已知3D点 $A,B,C$ 与其投影点 $a,b,c$ 的对应关系，利用几何三角测量恢复相机位姿。}；
                 \item 优化后的：\textbf{EPnP, PnP, UPnP}；
-                \item 构建成最小二乘问题迭代求解：\textbf{Bundle Adjustment（BA）}。
+                \item 构建成最小二乘问题迭代求解。
             \end{enumerate}
                                                 \begin{figure}[H]
                                                     \centering

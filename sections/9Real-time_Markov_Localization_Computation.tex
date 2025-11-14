@@ -466,13 +466,12 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
         $$p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})=\int p(\mathbf{z}_t^i,\mathbf{x}_t | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})\mathrm{d}\mathbf{x}_t$$   
         使用乘法规则：
         $$p(\mathbf{z}_t^i | C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})=\int p(\mathbf{z}_t^i |\mathbf{x}_t,C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})p(\mathbf{x}_t |C^t, \mathbf{m}, \mathbf{Z}^{t-1}, \mathbf{U}^{t-1})\mathrm{d}\mathbf{x}_t$$  
-        则积分内是两个高斯分布，即两个高斯分布的卷积：
+        对积分内前一项：当前观测与过去观测和所有控制量无关：
         \begin{align}
         p(\mathbf{z}_t^i \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})
-        &= \int p(\mathbf{z}_t^i,\mathbf{x}_t \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})\,\mathrm{d}\mathbf{x}_t \\
         &= \int p(\mathbf{z}_t^i \mid \mathbf{x}_t,C^t,\mathbf{m})\; p(\mathbf{x}_t \mid \mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})\,\mathrm{d}\mathbf{x}_t .
         \end{align}
-        接下来我们只需要算出这两个高斯分布的均值和方差即可。\\
+        则积分内是两个高斯分布，即两个高斯分布的卷积：接下来我们只需要算出这两个高斯分布的均值和方差即可。\\
         \noindent\textbf{两项分别为高斯：}
 \[
 p(\mathbf{x}_t \mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1})
@@ -833,7 +832,7 @@ p(\mathbf{z}_t^{\,i} \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})
                 \caption{绑架问题示例}
             \end{figure}
             \textbf{绑架检测}：检测\textbf{一段时间内}的\textbf{观测模型}概率分布，如果概率都很低，说明粒子都偏离了真值
-            $$ p\left( {{\mathbf{Z}}_{t} \mid  {\mathbf{Z}}^{t - 1},{\mathbf{u}}_{{1} : t - 1},\mathbf{m}}\right)  \approx  \textcolor{red}{\mathop{\sum }\limits_{{{t}^{\prime } = {t_1}}}}\frac{1}{M}\mathop{\sum }\limits_{{m = 1}}^{M}{\omega }_{{t}^{\prime }}^{\left\lbrack  m\right\rbrack  } $$
+            $$ p\left( {{\mathbf{Z}}_{t} \mid  {\mathbf{Z}}_{t - 1},{\mathbf{U}}_{t-1} ,\mathbf{m}}\right)  \approx  \textcolor{red}{\mathop{\sum }\limits_{{{t}^{\prime } = {t_1}}}^{t}}\frac{1}{M}\mathop{\sum }\limits_{{m = 1}}^{M}{\omega }_{{t}^{\prime }}^{\left\lbrack  m\right\rbrack  } $$
             \textbf{解决办法}：调整粒子分布\footnote{两种办法，一种是识别到被绑架后从头再来，把点均匀随机撒到全图上重新慢慢收敛到新位置上；另一种是头铁，硬顶着问题根据观测让粒子逐渐收敛到新位置上}：
                 \begin{itemize}
                     \item (1)在位姿空间均匀分布，利用当前观测评估权重
