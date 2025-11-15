@@ -185,7 +185,7 @@ $$p(\mathbf{x}_{0}) = \mathcal{N}(\mathbf{x}_{0}; \boldsymbol{\mu}_{0},
   $$
           计算$\mathbf{K}_t$时，时间复杂度是$O(k^{2.376})$，其中$k$是特征向量维度，即观测到的特征数\\
           计算$\boldsymbol{\Sigma}_t$时，时间复杂度是$O(n^2)$，其中$n$是状态向量维度，即机器人的位姿描述维度
-  \item \textbf{推导过程}
+  \item \textbf{推导过程}\label{ekf_process}
   
   {\small\kaishu{
   \begin{enumerate}
@@ -844,6 +844,7 @@ p(\mathbf{z}_t^{\,i} \mid C^t,\mathbf{m},\mathbf{Z}^{t-1},\mathbf{U}^{t-1})
                 \item 难以推广到大范围环境6DOF\footnote{例如无人机六个维度，每多一个维度都需要粒子集指数级增长}位姿估计：粒子集必须足够大，才能覆盖t-1时刻后验的分布
                 \item 为解决绑架问题，始终需要保持一部分粒子全局分布，避免完全收敛到局部，但导致全局也很难快速收敛到新位置
             \end{itemize}
+            \label{example_pf}
             \textbf{例题}：\\
                 {\small\kaishu{
                 现有一机器人在如下左图所示场景中需要实现自主定位,初始位置未知,拟采用粒子滤波定位方法,场景

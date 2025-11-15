@@ -218,7 +218,7 @@
         \[
         \widehat{\mathbf{X}}^{t} \triangleq \mathbb{E}\left[ \mathbf{X}^{t} \mid \mathbf{Z}^{t}, \mathbf{U}^{t-1}, \mathbf{m} \right]
         \]
-        即在给定当前时刻以及历史所有观测$\mathbf{Z}^{t}$、上一时刻以及之前所有控制$\mathbf{U}^{t-1}$，以及地图$\mathbf{m}$后，路径的$\mathrm{x}^t$最优估计。
+        即在给定当前时刻以及历史所有观测$\mathbf{Z}^{t}$、上一时刻以及之前所有控制$\mathbf{U}^{t-1}$，以及地图$\mathbf{m}$后，路径的$\mathrm{x}^t$最优估计。\label{prove}
         {\small\kaishu 
         \begin{enumerate}
         \item \textbf{问题定义}：\\
@@ -394,7 +394,7 @@ $$
             \item \textbf{速度运动模型}：$u_{t-1}$是\textbf{控制机器人运动的指令}，回顾其航位推算计算公式：
             $$\left.\left(\begin{array}{c}x'\\y'\\\theta'\end{array}\right.\right)=\left(\begin{array}{c}x-\frac{\nu}{\omega}\sin(\theta)+\frac{\nu}{\omega}\sin(\theta+\omega\Delta t)\\y+\frac{\nu}{\omega}\cos(\theta)-\frac{\nu}{\omega}\cos(\theta+\omega\Delta t)\\\theta+\omega\Delta t\end{array}\right)$$
         \end{itemize}\footnote{这里$x'$就是$x_{t}$,$x$就是$x_{t-1}$，对于$y、\theta$同理}
-
+\label{yundongmoxing}
 \begin{enumerate}
     \item \textbf{里程计运动模型}\\
     我们的最终目的是计算出$$p(\mathrm{x}_t|\mathrm{x}_{t-1},\mathrm{u}_{t-1})$$

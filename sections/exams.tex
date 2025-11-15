@@ -1,0 +1,502 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+\section{历年回忆卷及参考答案}
+本部分是笔者与部分同学讨论后的答案，仅供参考，欢迎学弟学妹继续回忆并添加后续历年卷答案。
+\subsection{【2021-2022秋】回忆卷}
+ \textbf{贡献者：} \href{https://www.cc98.org/topic/5197531}{AnderK} 
+\begin{itemize}
+    \item \textbf{选择题}
+    \begin{enumerate}
+        \item 一些算法，哪个与障碍复杂性无关？
+        \\{\small\kaishu{\textcolor{blue}{猜测是考路径规划中的单元分解法，其中近似单元分解与障碍复杂性无关。}}}
+        \item 人工势场法相关描述找一个错的。
+        \\{\small\kaishu{\textcolor{blue}{错误选项可能是“不会陷入局部极小”或“不适用于动态避障”？}}}
+        \item A*和Dijkstra的搜索效果区分
+        \\{\small\kaishu{\textcolor{blue}{A*引入了启发式函数$h(n)$，搜索更有目的性、方向性，当$h(n)$可采用时具有最优性。}}}
+        \item RRT路径曲折的原因
+        \\{\small\kaishu{\textcolor{blue}{随机采样的本质导致扩展方向不确定,缺乏对目标点的引导,树的生长呈现随机探索特性,因此规划出的路径通常不平滑、包含大量曲折点。}}}
+        \item ICP收敛因素？
+        \\{\small\kaishu{\textcolor{blue}{初始对齐是否接近、点云重叠区域大小、噪声与外点等都会影响。}}}
+        \item ICP计算效率因素
+        \\{\small\kaishu{\textcolor{blue}{主要受最近邻点搜索影响。每次迭代都需要在目标点云中为源点寻找最近点。}}}
+        \item 四足机器人用什么地图导航？
+        \\{\small\kaishu{\textcolor{blue}{比如“高度栅格图”？本题是建图章节内容，目前本课程已无此内容。}}}
+        \item RANSAC采样数和收敛速度的关系
+        \\{\small\kaishu{\textcolor{blue}{$K_{need} = \frac{\log(1-p)}{\log(1-w^s)}$，$\omega$是内点率小于1，采样数$s$越大，分母绝对值越小，迭代次数越多}}}
+        \item TLS和RANSAC比较
+        \\{\small\kaishu{\textcolor{blue}{RANSAC 用最小样本子集反复抽样，TLS 是一次性用全部数据配合截断代价，目前本课程已无此内容。}}}
+        \item Hough是对什么东西进行投票？
+        \\{\small\kaishu{\textcolor{blue}{目前本课程已无此内容。}}}
+    \end{enumerate}
+    \item \textbf{大题}
+    \begin{enumerate}
+        \item 四轮都是45°的Swedish轮运动学建模（10）
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 可移动度、可操纵度、机动度的判别（共5种车，分别写出上述的大小）（10）
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 简答题（30）
+        \begin{enumerate}
+            \item 路径规划、轨迹规划、避障规划名词解释，并写出相互之间的应用关联
+            {\small\kaishu{\textcolor{blue}{
+            \begin{itemize}
+                \item 路径规划：根据所给定的地图和目标位置，规划一条使机器人到达目标位置的路径。
+                \item 避障规划：根据所得到的实时传感器测量信息，调整路径/轨迹以避免发生碰撞。
+                \item 轨迹规划：根据机器人的运动学模型和约束，寻找适当的控制命令，将可行路径转化为可行轨迹。
+            \end{itemize}
+            路径规划是战略方法，避障规划是战术方法，轨迹规划是机器人执行，三者两两 互补，共同完成机器人导航任务。
+            }}}
+            \item 里程估计、航位推算、自定位名词解释，并写出应用关联
+            {\small\kaishu{\textcolor{blue}{
+            \begin{itemize}
+                \item 里程估计：根据传感器感知信息推导机器人位姿（位置和角度）变化。
+                \item 航位推算：基于已知位置，利用里程估计推算当前位置。
+                \item 自定位：给定环境地图 (对环境的已有知识) 的条件下，根据机器人的运动控制/里程估计信息和传感器感知数据 (当前认知) 估计机器人相对于环境地图的坐标。
+            \end{itemize}
+            里程估计和航位推算是机器人自定位的重要组成部分，在运动模型中应用，用于进行位姿预估。
+            }}}
+            \item 园区物流机器人，有码盘、2D激光、IMU，设计地图表示方法、定位方法、导航方法。
+            \begin{enumerate}
+            \item 设计地图表示方式；\\
+            {\small\kaishu{\textcolor{blue}{
+            采用\textbf{复合地图}：全局稀疏拓扑图+ 局部\textbf{占据栅格/TSDF}子图以支持避障与定位。码盘与IMU形成里程计先验，2D激光做\textbf{ICP}生成子图。本小问是建图章节内容，本学期课程之后已没有。
+            }}}
+            \item 定位算法设计；\\
+            {\small\kaishu{\textcolor{blue}{
+            可以简单叙述EKF或PF。
+            }}}
+            \item 导航规划算法设计；\\
+            {\small\kaishu{\textcolor{blue}{
+            路径规划用A*，避障规划可以用DWA，轨迹规划考虑用混合A*，结合MPC。
+            }}}
+            \end{enumerate}
+        \end{enumerate}
+        \item 实时自定位贝叶斯公式的推导（小xt那个），并写出EKF的基本思想、误差来源和定位失败的主要原因（14）
+        {\small\kaishu{\textcolor{blue}{
+        \begin{itemize}
+            \item 推导见：\hyperref[prove]{推导过程}
+            \item EKF的基本思想：采用非线性函数表示运动方程和观测方程，计算非线性转换后实际概率分布的高斯近似。
+            \item 误差来源：
+            \begin{itemize}
+                \item 高斯分布来替代任何其他分布，丧失了原来可能的多峰信息，带来了误差；
+                \item 由 EKF 得到的均值与下一时刻后验实际概率分布的均值是不一样的，带来了误差
+            \end{itemize}
+            \item 定位失败主要原因：数据关联问题，一般情况下$c_t^i$未知，错误关联导致定位失败
+        \end{itemize}
+        }}}
+        \item 粒子滤波相关，很有意思的一题，要求根据观测数据绘制粒子分布和重采样之后的分布，并写出重要性评估公式和相关计算。（16）
+        \\{\small\kaishu{\textcolor{blue}{
+        这道题我猜可能是和\hyperref[example_pf]{例题}很像，重要性评估公式就根据建议分布和目标分布来写就可以，相关计算不知道是想考什么计算。
+        }}}
+    \end{enumerate}
+\end{itemize}
+
+
+\subsection{【2022-2023秋】回忆卷}
+\textbf{贡献者：} \href{https://www.cc98.org/topic/5461756}{ziluolan} 、\href{https://www.cc98.org/topic/5466623}{tracy02} 、\href{https://www.cc98.org/topic/5461632}{憨祎} 
+\begin{itemize}
+    \item \textbf{判断题}
+    \begin{enumerate}
+        \item Swedish轮有三个自由度，适合用来制作全向机器人。
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 带激光挡板标识的机器人不需要路径规划，只需要考虑轨迹规划。
+        \\{\small\kaishu{\textcolor{blue}{× 来自绪论，激光挡板那种机器人是无固定路径的，需要轨迹规划。}}}
+        \item 人工势场法：构建力场，求势场以获得控制率。
+        \\{\small\kaishu{\textcolor{blue}{× 势场和力场反了。}}}
+        \item RRT算法可以考虑机器人运动学约束。
+        \\{\small\kaishu{\textcolor{blue}{√ RRT考虑机器人的运动执行能力，如果说“可以”的话那确实可以，采样的时候考虑进去就行。}}}
+        \item RANSAC法随机采样数越多有利于快速得到较好的模型。
+        \\{\small\kaishu{\textcolor{blue}{× 如21-22秋选择，采样数越多需要的迭代次数越多，并不会快速。且有可能把更多外点纳入进来计算本质矩阵，未必模型更好。}}}
+        \item 粒子滤波法中，粒子集中的位置表示机器人在此处的概率较大。
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+        \item 粒子枯竭是因为粒子数少。
+        \\{\small\kaishu{\textcolor{blue}{× 是粒子重采样后集中到某些位置了，而粒子数保持不变。}}}
+        \item 自定位求解方法有：马尔可夫定位法、EKF法、粒子滤波法。
+        \\{\small\kaishu{\textcolor{blue}{× 马尔可夫定位法不是自定位的“求解”方法，而是EKF、PF等的本质原理。}}}
+    \end{enumerate}
+
+    \item \textbf{大题}
+    \begin{enumerate}
+        \item 六轮麦克纳姆（Mecanum）轮运动学建模：给出整体运动学模型；在给定机体线速度与角速度时求各轮角速度；分析并判别可移动度、可操纵度、机动度与完整性；说明适合的使用场景与对地面条件的要求。
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 轨迹/路径生成方法比较与选型：比较图形搜索法、参数优化法、反馈控制法（从控制量、搜索空间是否连续、是否全局最优、速度是否平滑四个方面对比）；给定三个应用场景（工厂中送货、崎岖不平的山路、校园中跟随送货），分别选择一种方法并简述理由。
+        \\
+        {\small\kaishu{\textcolor{blue}{
+        \begin{tabular}{lccccc}
+        \toprule
+        \textbf{方法} & \textbf{控制量} & \textbf{搜索空间是否连续} & \textbf{是否全局最优} & \textbf{速度是否平滑} \\
+        \midrule
+        图形搜索法   & $x,y$      & 0 & 1 & 0  \\
+        参数优化法   & $v,\omega$ & 1 & 0 & 1  \\
+        反馈控制法   & $v,\omega$ & 1 & 0 & 0  \\
+        \bottomrule
+        \end{tabular}
+        \begin{itemize}
+            \item 工厂中送货：参数优化法（通常需要最优时间/效率等）。
+            \item 崎岖不平的山路：图形搜索法（静态场景，未知/险峻地形，先保命可达，全局可行保障）。
+            \item 校园中跟踪送货：反馈控制法（毕竟需要跟踪，强动态和交互）。
+        \end{itemize}
+        }}}
+        \item ICP相关（点到点为主）：\begin{enumerate}
+            \item point-to-point ICP步骤；
+            {\small\kaishu{\color{blue}{
+                \begin{enumerate}
+                    \item 估计 $P'$ 集合点与 $P$ 集合点的初始位姿关系；
+                    \item 根据最近邻域规则建立 $P'$ 集合点与 $P$ 集合点的关联；
+                    \item 利用线性代数 / 非线性优化的方式估计旋转平移量；
+                    \item 对点集合 $P'$ 的点进行旋转平移；
+                    \item 如果旋转平移后重新关联的均方差小于阈值，则结束；
+                    \item 否则迭代重复上述步骤。
+                \end{enumerate}
+            }}}
+            \item ICP构建的优化目标（文字与公式表述）；
+            \\{\small\kaishu{\textcolor{blue}{计算两组数据之间的旋转平移量$R, t$，使得两组数据形成最佳匹配，即两组点的距离误差最小，即：
+            第 \( i \) 个匹配点的误差为：
+                $$
+                \mathbf{e}_i = \mathbf{p}_i - (R \mathbf{p}'_i + t)
+                $$
+                由此构建最小二乘问题：
+                $$
+                \min_{R, t} \frac{1}{2} \sum_{i=1}^{n} \left\| \mathbf{p}_i - (R \mathbf{p}'_i + t) \right\|^2
+                $$
+            }}}
+           
+                           
+            \item 初始位姿获取途径；
+             \\{\small\kaishu{\textcolor{blue}{
+             初始位姿可由里程计（Odometry）、IMU 惯性测量单元、或上一帧的位姿估计结果提供。这些先验信息可作为 ICP 的初值输入，使迭代更快收敛并避免陷入局部最优。}}}
+            
+            \item 为什么提出 line-to-line ICP 与 surface-to-surface ICP。
+            \\{\small\kaishu{\textcolor{blue}{
+             点到点 ICP 只最小化最近邻点间的欧氏距离，对沿目标表面的切向滑移约束很弱，易受噪声/密度影响而收敛慢、对初值敏感;将约束提升为线到线或面到面，把方向/法向与局部协方差纳入残差，显著增强可观测性与几何约束。收敛更快、鲁棒性更强、可收敛初值域更大。}}}
+        \end{enumerate}
+        \item 粒子滤波定位（给定矩形地图：一二三四象限中心各有编号桌子，$y$ 轴正负各有一个无编号的门）：\begin{enumerate}
+            \item 未进行任何观测时的位置估计概率表达式，画出粒子先验分布示意；\\[-4pt]
+            {\small\kaishu{\color{blue}
+            \textbf{未观测时：即全局定位，先验为均匀分布}\\
+            设可行域为 $\Omega_{\text{free}}$，则
+            \[
+              p(x_0\mid m)=
+              \begin{cases}
+                \dfrac{1}{|\Omega_{\text{free}}|}, & x_0\in\Omega_{\text{free}},\\[6pt]
+                0, & \text{otherwise}.
+              \end{cases}
+            \]
+            \textit{先验粒子示意：在整张可行区域内均匀撒点。}
+            }}
+        
+            \item 已知至两个桌子的距离且观测噪声为高斯分布，写出定位概率表达式并画先验粒子图；\\[-4pt]
+            {\small\kaishu{\color{blue}
+            \begin{enumerate}
+            \item \textbf{位姿预估} 
+            \[
+            \bar{p}(\mathbf{x}_t\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1},\mathbf{m})
+            \;=\;
+            \int p(\mathbf{x}_t\mid \mathbf{x}_{t-1},\mathbf{u}_{t-1},\mathbf{m})\;
+                 p(\mathbf{x}_{t-1}\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})\;
+            \mathrm{d}\mathbf{x}_{t-1}.
+            \]
+            其中由于机器人还没有运动，因此位姿预估就是均匀分布，即
+            $$\bar{p}(\mathbf{x}_t)=p(\mathbf{x}_{t-1}\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-2},\mathbf{m})=p(x_0\mid m)$$
+        
+            \item \textbf{观测更新} \\
+            对每个建议样本（或上一时刻传递样本）$\bar{\mathbf{x}}_t^{[i]}$，定义权重
+            \[
+              p(\mathbf{z}_t \mid \bar{\mathbf{x}}_t^{[i]}, C_t,\mathbf{m})
+              \;=\; \prod_{k=1}^{K} p\!\big(f_t^{k}\mid \bar{\mathbf{x}}_t^{[i]}, c_t^k,\mathbf{m}\big)=\prod_{k=1}^{K}          
+              \mathcal{N}\!\big(f_t^{k}\,;\, \hat{f}_t^{k},\, \mathbf{\sigma}_{f}^2\big)
+            \]
+            其中：
+            \begin{itemize}
+              \item $f_t^{k}$ 为第 $k$ 个桌子的观测量
+              \item $\hat{f_t^{k}}$ 为第 $k$ 个桌子的真实量
+              $$
+              \hat{f}_t^{k}\;=\; h^{k}\!\big(\bar{\mathbf{x}}_t^{[i]},\,\mathbf{m},\,c_t^{k}\big).
+              $$
+              \item $c_t^{k}$ 为数据关联；
+              \item ${\sigma}_{f}^2$ 为该观测的协方差。
+            \end{itemize}
+            \textit{数据关联未知时：}
+            \[
+              p(\mathbf{z}_t \mid \bar{\mathbf{x}}_t^{[i]}, \mathbf{m})
+              \;=\; \sum_{\mathbf{c}_t} p(\mathbf{c}_t)\;
+                    \prod_{k=1}^{K} \mathcal{N}\!\big(f_t^{k}\,;\, h^{k}(\bar{\mathbf{x}}_t^{[i]},\mathbf{m},c_t^{k}),\, \mathbf{\sigma}_{f}^2\big).
+            \]
+        
+            \item \textbf{则最终求得后验分布} 
+            \[
+            p(\mathbf{x}_t\mid \mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})
+            =\eta
+            p(\mathbf{z}_t\mid \mathbf{x}_t,\mathbf{m})\;\bar{p}(\mathbf{x}_t\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1},\mathbf{m}),
+            \]
+            \end{enumerate}
+            \textit{先验粒子示意：先验粒子图的话应该是指建议分布？本题的建议分布是位姿预估带来的而不是观测模型，那就是均匀分布？之后后验分布也就是目标分布应该是画到两个桌子的距离的两个圆环的交集？但我觉得这个题是想像例题一样让我们画由观测模型产生的建议分布，也就是两个圆环的并集？}
+            }}
+        
+            \item 机器人发生一次已知平移与转动，同时观测到两个桌子和一个门的距离，写出定位概率表达式并画先验粒子图；\\[-4pt]
+            {\small\kaishu{\color{blue}
+            \begin{enumerate}
+              \item \textbf{位姿预估}\\
+              已知本步控制量（一次平移与转动）$\,\mathbf{u}_{t-1}\,$，但是具体运动模型没给出，只能写作
+              \[
+                \bar{p}(\mathbf{x}_t\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1},\mathbf{m})
+              \]
+            
+              \item \textbf{观测更新}\\
+              本步同时观测两张桌子的距离与一个门的距离，记 $\mathbf{z}_t=\{f_t^{(1)},f_t^{(2)},f_t^{(\mathrm{door})}\}$。
+              \[
+                p(\mathbf{z}_t \mid \mathbf{x}_t,\mathbf{m})
+                \;=\; \sum_{\mathbf{c}_t} p(\mathbf{c}_t)\;
+                      \underbrace{\Big[ \prod_{k=1}^{2} p\big(f_t^{(k)} \mid \mathbf{x}_t,\mathbf{m},c_t^{(k)}\big) \Big]}_{\text{两张桌子}}
+                      \;\cdot\;
+                      \underbrace{p\big(f_t^{(\mathrm{door})}\mid \mathbf{x}_t,\mathbf{m},c_t^{(\mathrm{door})}\big)}_{\text{一个门}} .
+              \]
+              \textit{其中：}
+              \begin{itemize}
+                \item $\mathbf{c}_t=\big(c_t^{(1)},c_t^{(2)},c_t^{(\mathrm{door})}\big)$ 为数据关联变量
+                \item 各量测通道为高斯：
+                \[
+                  p\big(f_t^{(k)} \mid \mathbf{x}_t,\mathbf{m},c_t^{(k)}\big)
+                  = \mathcal{N}\!\big(f_t^{(k)}\ ;\ h^{\text{desk}}\!(\mathbf{x}_t,\mathbf{m},c_t^{(k)}),\ \sigma_{\text{desk}}^2\big),\quad k=1,2
+                \]
+                \[
+                  p\big(f_t^{(\mathrm{door})}\mid \mathbf{x}_t,\mathbf{m},c_t^{(\mathrm{door})}\big)
+                  = \mathcal{N}\!\big(f_t^{(\mathrm{door})}\ ;\ h^{\text{door}}\!(\mathbf{x}_t,\mathbf{m},c_t^{(\mathrm{door})}),\ \sigma_{\text{door}}^2\big).
+                \]
+              \end{itemize}
+              P对每个先验粒子 $\bar{\mathbf{x}}_t^{[i]}$ 计算
+              \[
+                 p(\mathbf{z}_t \mid \bar{\mathbf{x}}_t^{[i]},\mathbf{m})
+                \;=\; \sum_{\mathbf{c}_t} p(\mathbf{c}_t)\;
+                      \prod_{k=1}^{2} \mathcal{N}\!\big(f_t^{(k)} ;\ h^{\text{desk}}(\bar{\mathbf{x}}_t^{[i]},\mathbf{m},c_t^{(k)}),\sigma_{\text{desk}}^2\big)\;
+                      \mathcal{N}\!\big(f_t^{(\mathrm{door})} ;\ h^{\text{door}}(\bar{\mathbf{x}}_t^{[i]},\mathbf{m},c_t^{(\mathrm{door})}),\sigma_{\text{door}}^2\big).
+              \]
+            
+              \item \textbf{后验}
+              \[
+                p(\mathbf{x}_t\mid \mathbf{Z}^{t},\mathbf{U}^{t-1},\mathbf{m})
+                \;=\; \eta\; p(\mathbf{z}_t\mid \mathbf{x}_t,\mathbf{m})\; \bar{p}(\mathbf{x}_t\mid \mathbf{Z}^{t-1},\mathbf{U}^{t-1},\mathbf{m}),
+              \]
+              
+              \textit{先验粒子示意：应该是上一问的后验即两个圆环交集按照该旋转和平移量移动后的粒子分布（稍微松散化一点表示误差），后验应该是这个先验分布与各个观测圆环产生的交集，由于有两个门、四张桌子应该是有两处交集。}
+            \end{enumerate}
+            }}
+        
+            \item 已知第（c）小问中桌子的编号信息后，更新并画出先验粒子图；\\[-4pt]
+            {\small\kaishu{\color{blue}
+            \textbf{已知（c）中桌子编号后}\\
+            \textit{先验粒子示意：取(b)的后验也就是(c)的先验中的正确的哪一处？}
+            }}
+        
+            \item 若桌子编号识别出现错误，是否有办法被系统识别，简述判别思路。\\[-4pt]
+            {\small\kaishu{\color{blue}
+            \textbf{桌子编号识别若出错，能否被发现？}\\
+            可以用权重方差来判断，如：
+            $$
+              N_{\text{eff}}=\frac{1}{\sum_i (\omega_t^{[i]})^2}
+            $$
+            如果大于某一阈值，说明识别严重出错，应重新撒粒子且利用maximum likelihood correspondence单独估计每个特征的最大可能对应。
+            }}
+        \end{enumerate}
+        
+        \item 综合应用（移动机器人，计算与存储能力受限，校园快递送货）：
+        \begin{enumerate}
+            \item 设计地图表示方式（可采用复合地图），并说明如何由码盘、2D激光、IMU等传感器数据实现地图构建；\\
+            {\small\kaishu{\textcolor{blue}{
+            采用\textbf{复合地图}：全局稀疏拓扑图+ 局部\textbf{占据栅格/TSDF}子图以支持避障与定位。码盘与IMU形成里程计先验，2D激光做\textbf{ICP}生成子图。本小问是建图章节内容，本学期课程之后已没有。
+            }}}
+            \item 位置估计算法设计；\\
+            {\small\kaishu{\textcolor{blue}{
+            可以简单叙述EKF或PF。
+            }}}
+            \item 导航规划算法设计；\\
+            {\small\kaishu{\textcolor{blue}{
+            路径规划用A*，避障规划可以用DWA，轨迹规划考虑用混合A*，结合MPC。
+            }}}
+            \item 绘制系统框架图。\\
+            {\small\kaishu{\textcolor{blue}{
+            可以画绪论中的“自主移动机器人架构图”。
+            }}}
+        \end{enumerate}
+        
+    \end{enumerate}
+\end{itemize}
+
+\subsection{【2023-2024秋】回忆卷}
+\textbf{贡献者：} \href{https://www.cc98.org/topic/5754671}{minifull}
+\begin{itemize}
+    \item \textbf{判断题}
+    \begin{enumerate}
+        \item 人工势场法可以用于局部轨迹规划，也可以用于全局轨迹规划.
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+        \item 自定位方法有马尔可夫自定位法、EKF、粒子滤波。
+        \\{\small\kaishu{\textcolor{blue}{× 马尔可夫定位法不是自定位的“求解”方法，而是EKF、PF等的本质原理。}}}
+        \item 粒子枯竭现象指的是粒子数过少导致难以完成准确的估计。
+        \\{\small\kaishu{\textcolor{blue}{× 是粒子重采样后集中到某些位置了，而粒子数保持不变。}}}
+        \item “绑架”可以用来测试定位算法的收敛速度。
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+    \end{enumerate}
+
+    \item \textbf{大题}
+    \begin{enumerate}
+        \item 轮式运动学建模：两个固定标准轮分别由两个电机控制，另有一个电机控制脚轮的方向、一个电机控制脚轮的速度。
+        \begin{enumerate}
+            \item 给出机器人状态变化率与各轮转速的关系。
+            \item 当脚轮偏离中心 $30^\circ$ 时，为使机器人线速度为 $2\,\mathrm{m/s}$、角速度为 $1\,\mathrm{rad/s}$，求各轮的转速。
+            \item 分析或计算机器人的可移动度、可操纵度与机动度。
+            \item 判断该机器人设计是否合理；如不合理，说明原因并给出改进方案。
+        \end{enumerate}
+        {\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 比较 RRT 与 PRM 算法：给出至少一个共同点与三个不同点，并说明二者如何实现完备性。
+        \\{\small\kaishu{\color{blue}{
+        \textbf{共同点：} 都是基于随机采样的路径规划方法，都具有概率完备性。
+        
+        \textbf{不同点：}
+        \begin{itemize}
+          \item \textbf{数据结构}：PRM构建图，多次查询；RRT构建树，单次查询。
+          \item \textbf{扩展策略}：PRM先采样后邻近连边，RRT从最近节点向随机样本单向扩展。
+          \item \textbf{动态适用性}：PRM不适用动态环境；RRT适用于动态环境。
+        \end{itemize}
+        
+        \textbf{完备性（概率完备性）方式：}
+        \begin{itemize}
+          \item \textbf{PRM：} 随着采样数量增多并按合理规则连边、且局部连线成功概率非零，采样会覆盖自由空间；若可行路径存在，找到解的概率会逐步逼近 1。
+          \item \textbf{RRT：} 在均匀采样与有限步长扩展且局部扩展成功概率非零的前提下，所有可达区域都会被逐步探索；若可行路径存在，找到解的概率会随迭代次数增加而趋近 1。
+        \end{itemize}
+        }}}
+        \item 综合设计：火星探索六轮机器人（配备双目视觉与 IMU），就下列问题给出方案并简述基本思想或步骤。
+        \begin{enumerate}
+            \item 地图表达方式；
+            \item 局部地图构建方法；
+            \item 里程估计；
+            \item 定位；
+            \item 导航。
+        \end{enumerate}
+        {\small\kaishu{\textcolor{blue}{
+        分别回答如下：
+        \begin{enumerate}
+        \item \textbf{地图表达方式：} 全局用稀疏拓扑图；局部\textbf{占据栅格/TSDF}子图以支持避障与定位。
+        \item \textbf{局部地图构建方法：} 双目视差生成深度，结合 IMU 预积分位姿在做 TSDF 融合，并实时从 TSDF 提取 ESDF。
+        \item \textbf{里程估计：} 用IMU，可以参考\hyperref[imu]{基于惯性单元的里程估计}
+        \item \textbf{定位：} 可以简单叙述EKF或PF。
+        \item \textbf{导航：} 路径规划用A*，避障规划可以用DWA，轨迹规划考虑用混合A*，结合MPC。
+        \end{enumerate}
+        }}}
+
+        \item 运动模型：给出机器人的运动模型，写出 $p(x_{t+1}\mid u_t, x_t)$ 的概率分布（与 EKF 大作业基本一致）。
+        \\{\small\kaishu{\textcolor{blue}{
+           可以参考\hyperref[yundongmoxing]{运动模型}。
+        }}}
+
+        \item EKF 框图填充：给定一套框图，要求写出各步骤对应的 EKF 方程（共七步，如状态预估、观测预估等）。题目未指定具体观测传感器，需给出一般形式的观测模型与地图路标更新步骤。
+                \\{\small\kaishu{\textcolor{blue}{
+           可以参考\hyperref[ekf_process]{EKF推导过程}。
+        }}}
+
+
+        \item 粒子滤波：基于“2023 年课程智云最后一节课”所给场景（教七二楼）进行回答。
+        \begin{enumerate}
+            \item 说明粒子滤波的主要思想。
+            \\{\small\kaishu{\textcolor{blue}{通过一组样本（粒子）来近似表示概率分布。}}}
+            \item 后续三问参照课堂示例场景设置（与上一年类似）：根据给定观测与动作信息，绘制粒子分布与重采样后的分布，并写出重要性评估公式与相关计算。
+            \\{\small\kaishu{\textcolor{blue}{我不行了，有点无力，参考22-23那道题吧：如果问重采样之后的分布就画交集，重要性评估公式就是权重：如果是给出了运动模型，那么此时权重就是观测模型；如果未给出运动模型，此时权重就用目标分布比建议分布去算，每个陆标的观测并集是建议分布，交集是目标分布。}}}
+        \end{enumerate}
+    \end{enumerate}
+\end{itemize}
+
+\subsection{【2024-2025秋】回忆卷}
+\textbf{贡献者：} \href{https://www.cc98.org/topic/6032906}{濯雪}
+\begin{itemize}
+    \item \textbf{选择题}
+    \begin{enumerate}
+        \item A*算法的特点？
+        \\{\small\kaishu{\textcolor{blue}{不知道想考什么，应该不难。}}}
+        \item SLAM算法的目的是？
+        \\{\small\kaishu{\textcolor{blue}{在未知环境中实现同时定位与建图，25年没讲这一章。}}}
+        \item RRT算法的应用场景？
+        \\{\small\kaishu{\textcolor{blue}{高维、障碍复杂/非凸空间的快速可行路径探索}}}
+        \item 重采样的目的是？
+        \\{\small\kaishu{\textcolor{blue}{根据一个已知的可以采样的分布再一次采样，通过对粒子重要性评估，进行重采样获得目标样本分布}}}
+        \item 自行车的可移动度是？
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 2.5维栅格地图中栅格的值是？
+        \\{\small\kaishu{\textcolor{blue}{地面/地形的标高（高度$z$），属于建图，目前本课程已无此内容。}}}
+        \item RANSAC拟合算法，内点70\%，希望得到好样本的概率是99.9\%，K最小值为？
+        \\{\small\kaishu{\textcolor{blue}{笔记\hyperref[RANSAC_example]{例题}原题。}}}
+        \item 脚轮的自由度是？
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 基于SVD分解的点到点ICP中，R和T先算哪个？
+        \\{\small\kaishu{\textcolor{blue}{先算R。}}}
+        \item 视觉里程计常用的特征是？
+        \\{\small\kaishu{\textcolor{blue}{角点特征例如ORB、Haris、Shi-Tomasi、FAST；圆块特征例如SIFT、SUFT、CENSURE。}}}
+        
+    \end{enumerate}
+
+    \item \textbf{判断题}
+    \begin{enumerate}
+        \item 激光雷达可以测量机器人到障碍物的距离
+        \\{\small\kaishu{\textcolor{blue}{√ 这题是何意味...}}}
+        \item EKF算法中，状态更新是线性的
+        \\{\small\kaishu{\textcolor{blue}{× 非线性的，所以才要做线性化。}}}
+        \item RRT是基于随机采样的路径规划方法
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+        \item 人工势场法不能进行局部避障
+        \\{\small\kaishu{\textcolor{blue}{×}}}
+        \item 粒子滤波中粒子越多精度越高
+        \\{\small\kaishu{\textcolor{blue}{√ 只是会带来计算负担。}}}
+        \item 逆运动学比正运动学简单
+        \\{\small\kaishu{\textcolor{blue}{√ 这题是何意味...}}}
+        \item 马尔可夫定位是基于概率学的方法
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+        \item 机器人动力学分析不考虑摩擦力
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item 图形搜索法是路径规划方法
+        \\{\small\kaishu{\textcolor{blue}{× 图形搜索法是轨迹规划方法。}}}
+        \item 激光里程计相较于轮式里程计不容易收到地面不平整的影响
+        \\{\small\kaishu{\textcolor{blue}{√}}}
+    \end{enumerate}
+
+    \item \textbf{大题}
+    \begin{enumerate}
+        \item 六麦轮机器人运动学建模，和往年一个题差不多，列出运动模型，计算可移动度，可操作性，机动度，完整度
+        \\{\small\kaishu{\textcolor{blue}{机器人运动学建模，目前本课程已无此内容。}}}
+        \item EKF算法的作用和基本流程
+        \\{\small\kaishu{\textcolor{blue}{
+        作用：采用非线性函数表示运动方程和观测方程，计算非线性转换后实际概率分布的高斯近似。\\
+        基本流程：可以参考\hyperref[ekf_process]{EKF推导过程}。
+        }}}
+        \item RRT算法的基本流程和优缺点
+        \\{\small\kaishu{\textcolor{blue}{
+        基本流程：
+        \begin{enumerate}
+            \item 在可行空间随机采样
+            \item 找到当前树中离采样点最近的树节点
+            \item 从最近的树节点“生长”出新的节点和树枝(路径)
+            \item 如果此路径没有和环境发生碰撞，则将此节点和路径加到树中
+            \item 重复n次采样，直到树生长到终点区域
+        \end{enumerate}
+        优点：致力于找到从起点到终点的路径，相比 PRM 更具目标导向性，具有概率完备性、适用于高维空间。\\
+        缺点：产生的路径非最优，不够高效。
+        }}}
+        \item ICP算法中
+        \begin{enumerate}
+            \item 点与点之间如何进行匹配？说明最近邻匹配原理，给出误差公式
+            \\{\small\kaishu{\textcolor{blue}{
+            将源点云 $P'$ 在当前位姿 $(R,t)$ 下变换为 $R\mathbf p'_i+t$，在参考点云 $P$ 中为每个变换后的点寻找最近邻 $\mathbf p_{j(i)}=\arg\min_{\mathbf p_j\in P}\|\,\mathbf p_j-(R\mathbf p'_i+t)\|$ 并建立对应。对应固定后，点到点误差与目标函数为 $\mathbf e_i=\mathbf p_{j(i)}-(R\mathbf p'_i+t)$，$E(R,t)=\tfrac12\sum_i\|\mathbf e_i\|^2$。
+            }}}
+            \item 如何根据优化求出R和T？SVD分解的作用是？
+            \\{\small\kaishu{\textcolor{blue}{
+            去质心后定义 $\mathbf q_i=\mathbf p_{j(i)}-\mathbf p,\ \mathbf q'_i=\mathbf p'_i-\mathbf p'$ 与 $W=\sum_i \mathbf q'_i\mathbf q_i^\top=USV^\top$，最优旋转为 $R^*=V\,\mathrm{diag}(1,1,\mathrm{sign}(\det(VU^\top)))\,U^\top$，平移为 $t^*=\mathbf p-R^*\mathbf p'$。SVD 的作用是对互相关矩阵 $W$ 做正交分解，从而在 $SO(3)$ 约束下给出闭式的最优 $R$ 并避免反射解。
+            }}}
+            \item 初始对齐不好对于迭代的影响是？如何获得较好的初始对齐？
+            \\{\small\kaishu{\textcolor{blue}{
+            初值偏差大会缩小收敛域、导致错误对应与局部极小（甚至发散），并显著增加迭代次数。可用里程计/IMU/视觉里程计外推作初值，再交给 ICP 精细配准。
+            }}}
+        \end{enumerate}
+
+        \item 一个六轮火星车，有相机和激光，设计地图表示方法、数据融合方法、路径规划方法、自主避障方法。分析在复杂环境下的表现。
+            \\{\small\kaishu{\textcolor{blue}{
+            和前面几套卷的类似，就不写了。
+            }}}
+    \end{enumerate}
+\end{itemize}
+\end{document}
